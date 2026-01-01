@@ -1,3 +1,23 @@
 node_modules
 
 .env
+
+# TypeScript
+dist
+*.tsbuildinfo
+*.log
+
+# IDE
+.vscode
+
+.idea
+*.swp
+*.swo
+
+# Testing
+coverage
+.nyc_output
+
+# OS
+.DS_Store
+Thumbs.db
