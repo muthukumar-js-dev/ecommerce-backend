@@ -3,21 +3,33 @@
  */
 export const APP_CONSTANTS = {
   // JWT
-  JWT_EXPIRY: '30d',
-  JWT_REFRESH_EXPIRY: '90d',
+  JWT_EXPIRY: '7d',
+  JWT_REFRESH_EXPIRY: '30d',
   
   // Pagination
-  DEFAULT_PAGE_SIZE: 10,
+  DEFAULT_PAGE_SIZE: 20,
   MAX_PAGE_SIZE: 100,
   
   // Validation
   MIN_PASSWORD_LENGTH: 8,
   MAX_PASSWORD_LENGTH: 128,
+  MIN_NAME_LENGTH: 2,
+  MAX_NAME_LENGTH: 100,
+  MIN_DESCRIPTION_LENGTH: 10,
+  MAX_DESCRIPTION_LENGTH: 5000,
   
   // Business rules
   MAX_CART_ITEMS: 50,
   MAX_WISHLIST_ITEMS: 100,
   ORDER_DELIVERY_DAYS: 4,
+  MAX_CART_ITEM_QUANTITY: 10,
+  MIN_CART_ITEM_QUANTITY: 1,
+  MIN_PRODUCT_PRICE: 0,
+  MAX_PRODUCT_IMAGES: 10,
+  ORDER_CANCELLATION_WINDOW_HOURS: 24,
+  
+  // Currency
+  DEFAULT_CURRENCY: 'INR',
   
   // Rate limiting
   RATE_LIMIT_WINDOW_MS: 60 * 1000, // 1 minute
@@ -26,6 +38,10 @@ export const APP_CONSTANTS = {
   // Timeouts
   DEFAULT_TIMEOUT_MS: 30000, // 30 seconds
   PAYMENT_TIMEOUT_MS: 60000, // 60 seconds
+  
+  // File Upload
+  MAX_FILE_SIZE_MB: 5,
+  ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/webp'] as readonly string[],
 } as const;
 
 /**

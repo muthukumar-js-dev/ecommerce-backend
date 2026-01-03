@@ -1,0 +1,360 @@
+Error: User validation failed: _id: Cast to ObjectId failed for value "1c7f3f61-ccf9-4824-b46b-eff350e4b5f4" (type string) at path "_id" because of "BSONError"
+    at ValidationError.inspect (D:\github\ecommerce-backend\node_modules\mongoose\lib\error\validation.js:50:26)
+    at formatValue (node:internal/util/inspect:829:19)
+    at inspect (node:internal/util/inspect:372:10)
+    at formatWithOptionsInternal (node:internal/util/inspect:2334:40)
+    at Object.format (node:internal/util/inspect:2191:10)
+    at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:71:79)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:24)
+    at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22) {
+  errors: {
+    _id: CastError: Cast to ObjectId failed for value "1c7f3f61-ccf9-4824-b46b-eff350e4b5f4" (type string) at path "_id" because of "BSONError"
+        at SchemaObjectId.cast (D:\github\ecommerce-backend\node_modules\mongoose\lib\schema\objectId.js:250:11)
+        at SchemaObjectId.SchemaType.applySetters (D:\github\ecommerce-backend\node_modules\mongoose\lib\schemaType.js:1219:12)
+        at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1416:22)
+        at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1115:16)
+        at model.Document (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:166:12)
+        at model.Model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:125:12)
+        at new model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:4602:15)
+        at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:64:19)
+        at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:50)
+        at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22) {
+      stringValue: '"1c7f3f61-ccf9-4824-b46b-eff350e4b5f4"',
+      messageFormat: undefined,
+      kind: 'ObjectId',
+      value: '1c7f3f61-ccf9-4824-b46b-eff350e4b5f4',
+      path: '_id',
+      reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+          at new ObjectId (D:\github\ecommerce-backend\node_modules\bson\src\objectid.ts:80:15)
+          at castObjectId (D:\github\ecommerce-backend\node_modules\mongoose\lib\cast\objectid.js:25:12)
+          at SchemaObjectId.cast (D:\github\ecommerce-backend\node_modules\mongoose\lib\schema\objectId.js:248:12)
+          at SchemaObjectId.SchemaType.applySetters (D:\github\ecommerce-backend\node_modules\mongoose\lib\schemaType.js:1219:12)
+          at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1416:22)
+          at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1115:16)
+          at model.Document (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:166:12)
+          at model.Model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:125:12)
+          at new model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:4602:15)
+          at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:64:19)
+          at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:50)
+          at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22),
+      valueType: 'string'
+    }
+  },
+  _message: 'User validation failed'
+}
+Error: User validation failed: _id: Cast to ObjectId failed for value "3efcc5bc-026d-457e-9a74-d29539b612d2" (type string) at path "_id" because of "BSONError"
+    at ValidationError.inspect (D:\github\ecommerce-backend\node_modules\mongoose\lib\error\validation.js:50:26)
+    at formatValue (node:internal/util/inspect:829:19)
+    at inspect (node:internal/util/inspect:372:10)
+    at formatWithOptionsInternal (node:internal/util/inspect:2334:40)
+    at Object.format (node:internal/util/inspect:2191:10)
+    at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:71:79)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:24)
+    at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22) {
+  errors: {
+    _id: CastError: Cast to ObjectId failed for value "3efcc5bc-026d-457e-9a74-d29539b612d2" (type string) at path "_id" because of "BSONError"
+        at SchemaObjectId.cast (D:\github\ecommerce-backend\node_modules\mongoose\lib\schema\objectId.js:250:11)
+        at SchemaObjectId.SchemaType.applySetters (D:\github\ecommerce-backend\node_modules\mongoose\lib\schemaType.js:1219:12)
+        at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1416:22)
+        at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1115:16)
+        at model.Document (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:166:12)
+        at model.Model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:125:12)
+        at new model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:4602:15)
+        at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:64:19)
+        at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:50)
+        at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22) {
+      stringValue: '"3efcc5bc-026d-457e-9a74-d29539b612d2"',
+      messageFormat: undefined,
+      kind: 'ObjectId',
+      value: '3efcc5bc-026d-457e-9a74-d29539b612d2',
+      path: '_id',
+      reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+          at new ObjectId (D:\github\ecommerce-backend\node_modules\bson\src\objectid.ts:80:15)
+          at castObjectId (D:\github\ecommerce-backend\node_modules\mongoose\lib\cast\objectid.js:25:12)
+          at SchemaObjectId.cast (D:\github\ecommerce-backend\node_modules\mongoose\lib\schema\objectId.js:248:12)
+          at SchemaObjectId.SchemaType.applySetters (D:\github\ecommerce-backend\node_modules\mongoose\lib\schemaType.js:1219:12)
+          at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1416:22)
+          at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1115:16)
+          at model.Document (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:166:12)
+          at model.Model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:125:12)
+          at new model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:4602:15)
+          at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:64:19)
+          at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:50)
+          at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22),
+      valueType: 'string'
+    }
+  },
+  _message: 'User validation failed'
+}
+Error: User validation failed: _id: Cast to ObjectId failed for value "5fa7c377-947c-4f16-941b-c5d994effe07" (type string) at path "_id" because of "BSONError"
+    at ValidationError.inspect (D:\github\ecommerce-backend\node_modules\mongoose\lib\error\validation.js:50:26)
+    at formatValue (node:internal/util/inspect:829:19)
+    at inspect (node:internal/util/inspect:372:10)
+    at formatWithOptionsInternal (node:internal/util/inspect:2334:40)
+    at Object.format (node:internal/util/inspect:2191:10)
+    at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:72:79)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:24)
+    at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22) {
+  errors: {
+    _id: CastError: Cast to ObjectId failed for value "5fa7c377-947c-4f16-941b-c5d994effe07" (type string) at path "_id" because of "BSONError"
+        at SchemaObjectId.cast (D:\github\ecommerce-backend\node_modules\mongoose\lib\schema\objectId.js:250:11)
+        at SchemaObjectId.SchemaType.applySetters (D:\github\ecommerce-backend\node_modules\mongoose\lib\schemaType.js:1219:12)
+        at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1416:22)
+        at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1115:16)
+        at model.Document (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:166:12)
+        at model.Model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:125:12)
+        at new model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:4602:15)
+        at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:65:19)
+        at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:50)
+        at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22) {
+      stringValue: '"5fa7c377-947c-4f16-941b-c5d994effe07"',
+      messageFormat: undefined,
+      kind: 'ObjectId',
+      value: '5fa7c377-947c-4f16-941b-c5d994effe07',
+      path: '_id',
+      reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+          at new ObjectId (D:\github\ecommerce-backend\node_modules\bson\src\objectid.ts:80:15)
+          at castObjectId (D:\github\ecommerce-backend\node_modules\mongoose\lib\cast\objectid.js:25:12)
+          at SchemaObjectId.cast (D:\github\ecommerce-backend\node_modules\mongoose\lib\schema\objectId.js:248:12)
+          at SchemaObjectId.SchemaType.applySetters (D:\github\ecommerce-backend\node_modules\mongoose\lib\schemaType.js:1219:12)
+          at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1416:22)
+          at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1115:16)
+          at model.Document (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:166:12)
+          at model.Model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:125:12)
+          at new model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:4602:15)
+          at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:65:19)
+          at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:50)
+          at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22),
+      valueType: 'string'
+    }
+  },
+  _message: 'User validation failed'
+}
+Error: User validation failed: _id: Cast to ObjectId failed for value "e62cdc02-4052-4570-a2ee-111c9fe35c63" (type string) at path "_id" because of "BSONError"
+    at ValidationError.inspect (D:\github\ecommerce-backend\node_modules\mongoose\lib\error\validation.js:50:26)
+    at formatValue (node:internal/util/inspect:829:19)
+    at inspect (node:internal/util/inspect:372:10)
+    at formatWithOptionsInternal (node:internal/util/inspect:2334:40)
+    at Object.format (node:internal/util/inspect:2191:10)
+    at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:72:79)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:24)
+    at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22) {
+  errors: {
+    _id: CastError: Cast to ObjectId failed for value "e62cdc02-4052-4570-a2ee-111c9fe35c63" (type string) at path "_id" because of "BSONError"
+        at SchemaObjectId.cast (D:\github\ecommerce-backend\node_modules\mongoose\lib\schema\objectId.js:250:11)
+        at SchemaObjectId.SchemaType.applySetters (D:\github\ecommerce-backend\node_modules\mongoose\lib\schemaType.js:1219:12)
+        at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1416:22)
+        at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1115:16)
+        at model.Document (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:166:12)
+        at model.Model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:125:12)
+        at new model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:4602:15)
+        at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:65:19)
+        at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:50)
+        at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22) {
+      stringValue: '"e62cdc02-4052-4570-a2ee-111c9fe35c63"',
+      messageFormat: undefined,
+      kind: 'ObjectId',
+      value: 'e62cdc02-4052-4570-a2ee-111c9fe35c63',
+      path: '_id',
+      reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+          at new ObjectId (D:\github\ecommerce-backend\node_modules\bson\src\objectid.ts:80:15)
+          at castObjectId (D:\github\ecommerce-backend\node_modules\mongoose\lib\cast\objectid.js:25:12)
+          at SchemaObjectId.cast (D:\github\ecommerce-backend\node_modules\mongoose\lib\schema\objectId.js:248:12)
+          at SchemaObjectId.SchemaType.applySetters (D:\github\ecommerce-backend\node_modules\mongoose\lib\schemaType.js:1219:12)
+          at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1416:22)
+          at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1115:16)
+          at model.Document (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:166:12)
+          at model.Model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:125:12)
+          at new model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:4602:15)
+          at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:65:19)
+          at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:50)
+          at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22),
+      valueType: 'string'
+    }
+  },
+  _message: 'User validation failed'
+}
+Error: User validation failed: _id: Cast to ObjectId failed for value "3ed55d01-d498-43b5-bc4f-b001418e856f" (type string) at path "_id" because of "BSONError"
+    at ValidationError.inspect (D:\github\ecommerce-backend\node_modules\mongoose\lib\error\validation.js:50:26)
+    at formatValue (node:internal/util/inspect:829:19)
+    at inspect (node:internal/util/inspect:372:10)
+    at formatWithOptionsInternal (node:internal/util/inspect:2334:40)
+    at Object.format (node:internal/util/inspect:2191:10)
+    at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:72:79)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:24)
+    at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22) {
+  errors: {
+    _id: CastError: Cast to ObjectId failed for value "3ed55d01-d498-43b5-bc4f-b001418e856f" (type string) at path "_id" because of "BSONError"
+        at SchemaObjectId.cast (D:\github\ecommerce-backend\node_modules\mongoose\lib\schema\objectId.js:250:11)
+        at SchemaObjectId.SchemaType.applySetters (D:\github\ecommerce-backend\node_modules\mongoose\lib\schemaType.js:1219:12)
+        at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1416:22)
+        at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1115:16)
+        at model.Document (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:166:12)
+        at model.Model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:125:12)
+        at new model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:4602:15)
+        at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:65:19)
+        at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:50)
+        at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22) {
+      stringValue: '"3ed55d01-d498-43b5-bc4f-b001418e856f"',
+      messageFormat: undefined,
+      kind: 'ObjectId',
+      value: '3ed55d01-d498-43b5-bc4f-b001418e856f',
+      path: '_id',
+      reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+          at new ObjectId (D:\github\ecommerce-backend\node_modules\bson\src\objectid.ts:80:15)
+          at castObjectId (D:\github\ecommerce-backend\node_modules\mongoose\lib\cast\objectid.js:25:12)
+          at SchemaObjectId.cast (D:\github\ecommerce-backend\node_modules\mongoose\lib\schema\objectId.js:248:12)
+          at SchemaObjectId.SchemaType.applySetters (D:\github\ecommerce-backend\node_modules\mongoose\lib\schemaType.js:1219:12)
+          at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1416:22)
+          at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1115:16)
+          at model.Document (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:166:12)
+          at model.Model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:125:12)
+          at new model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:4602:15)
+          at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:65:19)
+          at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:50)
+          at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22),
+      valueType: 'string'
+    }
+  },
+  _message: 'User validation failed'
+}
+Error: User validation failed: _id: Cast to ObjectId failed for value "8763625e-1bf0-402d-81e5-332a20b31652" (type string) at path "_id" because of "BSONError"
+    at ValidationError.inspect (D:\github\ecommerce-backend\node_modules\mongoose\lib\error\validation.js:50:26)
+    at formatValue (node:internal/util/inspect:829:19)
+    at inspect (node:internal/util/inspect:372:10)
+    at formatWithOptionsInternal (node:internal/util/inspect:2334:40)
+    at Object.format (node:internal/util/inspect:2191:10)
+    at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:72:79)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:24)
+    at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22) {
+  errors: {
+    _id: CastError: Cast to ObjectId failed for value "8763625e-1bf0-402d-81e5-332a20b31652" (type string) at path "_id" because of "BSONError"
+        at SchemaObjectId.cast (D:\github\ecommerce-backend\node_modules\mongoose\lib\schema\objectId.js:250:11)
+        at SchemaObjectId.SchemaType.applySetters (D:\github\ecommerce-backend\node_modules\mongoose\lib\schemaType.js:1219:12)
+        at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1416:22)
+        at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1115:16)
+        at model.Document (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:166:12)
+        at model.Model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:125:12)
+        at new model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:4602:15)
+        at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:65:19)
+        at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:50)
+        at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22) {
+      stringValue: '"8763625e-1bf0-402d-81e5-332a20b31652"',
+      messageFormat: undefined,
+      kind: 'ObjectId',
+      value: '8763625e-1bf0-402d-81e5-332a20b31652',
+      path: '_id',
+      reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+          at new ObjectId (D:\github\ecommerce-backend\node_modules\bson\src\objectid.ts:80:15)
+          at castObjectId (D:\github\ecommerce-backend\node_modules\mongoose\lib\cast\objectid.js:25:12)
+          at SchemaObjectId.cast (D:\github\ecommerce-backend\node_modules\mongoose\lib\schema\objectId.js:248:12)
+          at SchemaObjectId.SchemaType.applySetters (D:\github\ecommerce-backend\node_modules\mongoose\lib\schemaType.js:1219:12)
+          at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1416:22)
+          at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1115:16)
+          at model.Document (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:166:12)
+          at model.Model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:125:12)
+          at new model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:4602:15)
+          at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:65:19)
+          at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:50)
+          at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22),
+      valueType: 'string'
+    }
+  },
+  _message: 'User validation failed'
+}
+Error: User validation failed: _id: Cast to ObjectId failed for value "8e142830-fdce-484a-a6bf-e6e2ffbe6dfe" (type string) at path "_id" because of "BSONError"
+    at ValidationError.inspect (D:\github\ecommerce-backend\node_modules\mongoose\lib\error\validation.js:50:26)
+    at formatValue (node:internal/util/inspect:829:19)
+    at inspect (node:internal/util/inspect:372:10)
+    at formatWithOptionsInternal (node:internal/util/inspect:2334:40)
+    at Object.format (node:internal/util/inspect:2191:10)
+    at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:72:79)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:24)
+    at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22) {
+  errors: {
+    _id: CastError: Cast to ObjectId failed for value "8e142830-fdce-484a-a6bf-e6e2ffbe6dfe" (type string) at path "_id" because of "BSONError"
+        at SchemaObjectId.cast (D:\github\ecommerce-backend\node_modules\mongoose\lib\schema\objectId.js:250:11)
+        at SchemaObjectId.SchemaType.applySetters (D:\github\ecommerce-backend\node_modules\mongoose\lib\schemaType.js:1219:12)
+        at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1416:22)
+        at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1115:16)
+        at model.Document (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:166:12)
+        at model.Model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:125:12)
+        at new model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:4602:15)
+        at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:65:19)
+        at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:50)
+        at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22) {
+      stringValue: '"8e142830-fdce-484a-a6bf-e6e2ffbe6dfe"',
+      messageFormat: undefined,
+      kind: 'ObjectId',
+      value: '8e142830-fdce-484a-a6bf-e6e2ffbe6dfe',
+      path: '_id',
+      reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+          at new ObjectId (D:\github\ecommerce-backend\node_modules\bson\src\objectid.ts:80:15)
+          at castObjectId (D:\github\ecommerce-backend\node_modules\mongoose\lib\cast\objectid.js:25:12)
+          at SchemaObjectId.cast (D:\github\ecommerce-backend\node_modules\mongoose\lib\schema\objectId.js:248:12)
+          at SchemaObjectId.SchemaType.applySetters (D:\github\ecommerce-backend\node_modules\mongoose\lib\schemaType.js:1219:12)
+          at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1416:22)
+          at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1115:16)
+          at model.Document (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:166:12)
+          at model.Model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:125:12)
+          at new model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:4602:15)
+          at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:65:19)
+          at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:50)
+          at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22),
+      valueType: 'string'
+    }
+  },
+  _message: 'User validation failed'
+}
+Error: User validation failed: _id: Cast to ObjectId failed for value "75f39878-6e7a-4298-a644-5dba0daab1ac" (type string) at path "_id" because of "BSONError"
+    at ValidationError.inspect (D:\github\ecommerce-backend\node_modules\mongoose\lib\error\validation.js:50:26)
+    at formatValue (node:internal/util/inspect:829:19)
+    at inspect (node:internal/util/inspect:372:10)
+    at formatWithOptionsInternal (node:internal/util/inspect:2334:40)
+    at Object.format (node:internal/util/inspect:2191:10)
+    at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:72:79)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:24)
+    at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22) {
+  errors: {
+    _id: CastError: Cast to ObjectId failed for value "75f39878-6e7a-4298-a644-5dba0daab1ac" (type string) at path "_id" because of "BSONError"
+        at SchemaObjectId.cast (D:\github\ecommerce-backend\node_modules\mongoose\lib\schema\objectId.js:250:11)
+        at SchemaObjectId.SchemaType.applySetters (D:\github\ecommerce-backend\node_modules\mongoose\lib\schemaType.js:1219:12)
+        at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1416:22)
+        at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1115:16)
+        at model.Document (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:166:12)
+        at model.Model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:125:12)
+        at new model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:4602:15)
+        at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:65:19)
+        at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:50)
+        at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22) {
+      stringValue: '"75f39878-6e7a-4298-a644-5dba0daab1ac"',
+      messageFormat: undefined,
+      kind: 'ObjectId',
+      value: '75f39878-6e7a-4298-a644-5dba0daab1ac',
+      path: '_id',
+      reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+          at new ObjectId (D:\github\ecommerce-backend\node_modules\bson\src\objectid.ts:80:15)
+          at castObjectId (D:\github\ecommerce-backend\node_modules\mongoose\lib\cast\objectid.js:25:12)
+          at SchemaObjectId.cast (D:\github\ecommerce-backend\node_modules\mongoose\lib\schema\objectId.js:248:12)
+          at SchemaObjectId.SchemaType.applySetters (D:\github\ecommerce-backend\node_modules\mongoose\lib\schemaType.js:1219:12)
+          at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1416:22)
+          at model.$set (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:1115:16)
+          at model.Document (D:\github\ecommerce-backend\node_modules\mongoose\lib\document.js:166:12)
+          at model.Model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:125:12)
+          at new model (D:\github\ecommerce-backend\node_modules\mongoose\lib\model.js:4602:15)
+          at UserRepository.save (D:\github\ecommerce-backend\src\infrastructure\database\mongodb\repositories\user.repository.ts:65:19)
+          at RegisterUserUseCase.execute (D:\github\ecommerce-backend\src\application\use-cases\user\register-user.use-case.ts:53:50)
+          at UserController.register (D:\github\ecommerce-backend\src\infrastructure\http\controllers\user.controller.ts:17:22),
+      valueType: 'string'
+    }
+  },
+  _message: 'User validation failed'
+}

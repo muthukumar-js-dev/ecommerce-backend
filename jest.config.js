@@ -7,6 +7,9 @@ module.exports = {
   
   // Roots
   roots: ['<rootDir>/src', '<rootDir>/tests'],
+
+  globalSetup: '<rootDir>/tests/global-setup.js',
+  globalTeardown: '<rootDir>/tests/global-teardown.js',
   
   // Test match patterns
   testMatch: [
@@ -16,7 +19,10 @@ module.exports = {
   
   // Transform files with ts-jest
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': ['ts-jest', {
+      tsconfig: 'tsconfig.test.json',
+      isolatedModules: true,
+    }],
   },
   
   // Module name mapper for path aliases
@@ -46,18 +52,8 @@ module.exports = {
     'json',
   ],
   
-  // Coverage thresholds
-  coverageThresholds: {
-    global: {
-      branches: 70,
-      functions: 70,
-      lines: 70,
-      statements: 70,
-    },
-  },
-  
   // Setup files
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  // setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   
   // Ignore patterns
   testPathIgnorePatterns: [

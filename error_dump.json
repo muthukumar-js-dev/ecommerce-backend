@@ -1,0 +1,11 @@
+{
+  "step": "register",
+  "status": 500,
+  "body": {
+    "success": false,
+    "error": {
+      "code": "DATABASE_ERROR",
+      "message": "Database error during USER_SAVE_ERROR: Failed to save user"
+    }
+  }
+}
