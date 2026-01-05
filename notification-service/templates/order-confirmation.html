@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f4f4f4; padding: 20px; }
+    .container { background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .header { background-color: #2196F3; color: white; padding: 30px 20px; text-align: center; }
+    .header h1 { margin: 0; font-size: 28px; }
+    .content { padding: 30px 20px; }
+    .order-details { background-color: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 5px; }
+    .order-details h3 { margin-top: 0; color: #2196F3; }
+    .item { border-bottom: 1px solid #ddd; padding: 15px 0; display: flex; justify-content: space-between; }
+    .item:last-child { border-bottom: none; }
+    .item-name { font-weight: bold; }
+    .total-section { margin-top: 20px; padding-top: 20px; border-top: 2px solid #2196F3; }
+    .total-row { display: flex; justify-content: space-between; margin: 8px 0; }
+    .total-row.grand-total { font-size: 18px; font-weight: bold; color: #2196F3; margin-top: 15px; }
+    .address-box { background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; background-color: #f4f4f4; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Order Confirmed!</h1>
+    </div>
+    <div class="content">
+      <h2>Hi {{customerName}},</h2>
+      <p>Thank you for your order. We've received it and will process it shortly.</p>
+      
+      <div class="order-details">
+        <h3>Order Details</h3>
+        <p><strong>Order Number:</strong> {{orderNumber}}</p>
+        <p><strong>Order Date:</strong> {{formatDate orderDate}}</p>
+        <p><strong>Estimated Delivery:</strong> {{formatDate estimatedDelivery}}</p>
+        
+        <h4 style="margin-top: 25px; margin-bottom: 15px;">Items:</h4>
+        {{#each items}}
+        <div class="item">
+          <div>
+            <div class="item-name">{{this.name}}</div>
+            <div style="color: #666; font-size: 14px;">Quantity: {{this.quantity}}</div>
+          </div>
+          <div style="text-align: right;">
+            <div>{{formatCurrency this.price}}</div>
+            <div style="color: #666; font-size: 14px;">each</div>
+          </div>
+        </div>
+        {{/each}}
+        
+        <div class="total-section">
+          <div class="total-row">
+            <span>Subtotal:</span>
+            <span>{{formatCurrency subtotal}}</span>
+          </div>
+          <div class="total-row">
+            <span>Shipping:</span>
+            <span>{{formatCurrency shipping}}</span>
+          </div>
+          <div class="total-row">
+            <span>Tax:</span>
+            <span>{{formatCurrency tax}}</span>
+          </div>
+          <div class="total-row grand-total">
+            <span>Total:</span>
+            <span>{{formatCurrency total}}</span>
+          </div>
+        </div>
+      </div>
+      
+      <h3>Shipping Address</h3>
+      <div class="address-box">
+        <p style="margin: 5px 0;"><strong>{{shippingAddress.recipientName}}</strong></p>
+        <p style="margin: 5px 0;">{{shippingAddress.street}}</p>
+        <p style="margin: 5px 0;">{{shippingAddress.city}}, {{shippingAddress.state}} {{shippingAddress.postalCode}}</p>
+        <p style="margin: 5px 0;">{{shippingAddress.country}}</p>
+      </div>
+      
+      <p>We'll send you another email when your order ships.</p>
+    </div>
+    <div class="footer">
+      <p>Questions? Contact us at support@example.com</p>
+      <p>&copy; 2026 E-Commerce Platform. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

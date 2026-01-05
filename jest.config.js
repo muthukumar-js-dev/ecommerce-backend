@@ -21,7 +21,6 @@ module.exports = {
   transform: {
     '^.+\\.ts$': ['ts-jest', {
       tsconfig: 'tsconfig.test.json',
-      isolatedModules: true,
     }],
   },
   
@@ -51,6 +50,28 @@ module.exports = {
     'lcov',
     'json',
   ],
+
+  // Coverage thresholds
+  coverageThresholds: {
+    global: {
+      branches: 80,
+      functions: 85,
+      lines: 85,
+      statements: 85,
+    },
+    './src/domain/**/*.ts': {
+      branches: 90,
+      functions: 95,
+      lines: 95,
+      statements: 95,
+    },
+    './src/application/**/*.ts': {
+      branches: 80,
+      functions: 85,
+      lines: 85,
+      statements: 85,
+    },
+  },
   
   // Setup files
   // setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],

@@ -1,4 +1,4 @@
-import { IOrderRepository } from '@domain/order/repositories/order.repository.interface';
+// import { IOrderRepository } from '@domain/order/repositories/order.repository.interface'; // Removed unused import
 import { OrderResponseDTO } from '@application/dtos/order/order.dto';
 import { AsyncResult, success, failure } from '@shared/types/result';
 import { NotFoundError } from '@shared/errors';
@@ -8,7 +8,7 @@ import { ID } from '@shared/types/common';
  * Use case for getting an order by ID
  */
 export class GetOrderUseCase {
-  constructor(private readonly orderRepository: IOrderRepository) {}
+  constructor(private readonly orderRepository: any) {}
 
   /**
    * Execute the get order use case

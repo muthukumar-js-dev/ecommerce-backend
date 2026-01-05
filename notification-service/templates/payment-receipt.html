@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f4f4f4; padding: 20px; }
+    .container { background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .header { background-color: #9C27B0; color: white; padding: 30px 20px; text-align: center; }
+    .header h1 { margin: 0; font-size: 28px; }
+    .content { padding: 30px 20px; }
+    .payment-box { background-color: #f3e5f5; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #9C27B0; }
+    .amount { font-size: 32px; font-weight: bold; color: #9C27B0; margin: 15px 0; }
+    .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; background-color: #f4f4f4; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>💳 Payment Receipt</h1>
+    </div>
+    <div class="content">
+      <h2>Hi {{customerName}},</h2>
+      <p>Thank you for your payment. This email confirms that we have received your payment for order <strong>{{orderNumber}}</strong>.</p>
+      
+      <div class="payment-box">
+        <p style="margin-top: 0;"><strong>Payment Details:</strong></p>
+        <div class="amount">{{formatCurrency amount}}</div>
+        <p><strong>Payment Method:</strong> {{paymentMethod}}</p>
+        <p><strong>Transaction ID:</strong> {{transactionId}}</p>
+        <p><strong>Date:</strong> {{formatDate paymentDate}} at {{formatTime paymentDate}}</p>
+        <p><strong>Status:</strong> <span style="color: #4CAF50; font-weight: bold;">✓ Successful</span></p>
+      </div>
+      
+      <p>This payment has been applied to your order. You will receive a separate email when your order ships.</p>
+      <p style="margin-top: 30px; font-size: 12px; color: #666;">Keep this email for your records.</p>
+    </div>
+    <div class="footer">
+      <p>Questions? Contact us at support@example.com</p>
+      <p>&copy; 2026 E-Commerce Platform. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

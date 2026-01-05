@@ -54,7 +54,7 @@ describe('Order Controller Integration', () => {
         .post('/api/orders')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
-          paymentMethod: 'credit_card',
+          paymentMethod: 'card',
           shippingAddressId: 'addr-123',
         });
 

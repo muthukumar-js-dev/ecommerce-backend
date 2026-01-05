@@ -1,5 +1,5 @@
 import { ICartRepository } from '@domain/cart/repositories/cart.repository.interface';
-import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
+// import { IProductRepository } from '@domain/product/repositories/product.repository.interface'; // Removed unused import
 import { Cart } from '@domain/cart/entities/cart.entity';
 import { AddToCartRequestDTO, CartResponseDTO } from '@application/dtos/cart/cart.dto';
 import { AsyncResult, success, failure, Result } from '@shared/types/result';
@@ -14,7 +14,7 @@ import { randomUUID } from 'crypto';
 export class AddToCartUseCase {
   constructor(
     private readonly cartRepository: ICartRepository,
-    private readonly productRepository: IProductRepository
+    private readonly productRepository: any
   ) {}
 
   /**

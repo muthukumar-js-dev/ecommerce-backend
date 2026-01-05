@@ -54,4 +54,60 @@ export class AddressController {
       next(error);
     }
   }
+
+  /**
+   * Update address
+   */
+  async update(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const userId = authReq.user.id;
+      const { addressId } = req.params;
+
+      if (!addressId) {
+        return next(new Error('Address ID is required'));
+      }
+
+      const result = await this.addressService.updateAddress(userId, addressId, req.body);
+
+      if (!result.success) {
+        return next(result.error);
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Address updated successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Delete address
+   */
+  async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const userId = authReq.user.id;
+      const { addressId } = req.params;
+
+      if (!addressId) {
+        return next(new Error('Address ID is required'));
+      }
+
+      const result = await this.addressService.deleteAddress(userId, addressId);
+
+      if (!result.success) {
+        return next(result.error);
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Address deleted successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

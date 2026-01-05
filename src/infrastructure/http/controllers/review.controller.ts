@@ -31,4 +31,60 @@ export class ReviewController {
       next(error);
     }
   }
+
+  /**
+   * Update a review
+   */
+  async update(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const userId = authReq.user.id;
+      const { reviewId } = req.params;
+
+      if (!reviewId) {
+        return next(new Error('Review ID is required'));
+      }
+
+      const result = await this.reviewService.updateReview(userId, reviewId, req.body);
+
+      if (!result.success) {
+        return next(result.error);
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Review updated successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Delete a review
+   */
+  async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const userId = authReq.user.id;
+      const { reviewId } = req.params;
+
+      if (!reviewId) {
+        return next(new Error('Review ID is required'));
+      }
+
+      const result = await this.reviewService.deleteReview(userId, reviewId);
+
+      if (!result.success) {
+        return next(result.error);
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Review deleted successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

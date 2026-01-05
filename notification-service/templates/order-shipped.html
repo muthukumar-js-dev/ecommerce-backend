@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f4f4f4; padding: 20px; }
+    .container { background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .header { background-color: #FF9800; color: white; padding: 30px 20px; text-align: center; }
+    .header h1 { margin: 0; font-size: 28px; }
+    .content { padding: 30px 20px; }
+    .tracking-box { background-color: #fff3e0; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #FF9800; }
+    .tracking-number { font-size: 20px; font-weight: bold; color: #FF9800; margin: 10px 0; }
+    .button { display: inline-block; padding: 12px 30px; background-color: #FF9800; color: white !important; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }
+    .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; background-color: #f4f4f4; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📦 Your Order Has Shipped!</h1>
+    </div>
+    <div class="content">
+      <h2>Hi {{customerName}},</h2>
+      <p>Great news! Your order <strong>{{orderNumber}}</strong> has been shipped and is on its way to you.</p>
+      
+      <div class="tracking-box">
+        <p style="margin-top: 0;"><strong>Tracking Information:</strong></p>
+        <div class="tracking-number">{{trackingNumber}}</div>
+        <p><strong>Carrier:</strong> {{carrier}}</p>
+        <p><strong>Estimated Delivery:</strong> {{formatDate estimatedDelivery}}</p>
+      </div>
+      
+      <center>
+        <a href="{{trackingUrl}}" class="button">Track Your Package</a>
+      </center>
+      
+      <p>You can track your package using the tracking number above or by clicking the button.</p>
+      <p>If you have any questions about your shipment, please don't hesitate to contact us.</p>
+    </div>
+    <div class="footer">
+      <p>Questions? Contact us at support@example.com</p>
+      <p>&copy; 2026 E-Commerce Platform. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

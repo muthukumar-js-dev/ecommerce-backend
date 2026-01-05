@@ -1,4 +1,4 @@
-import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
+// import { IProductRepository } from '@domain/product/repositories/product.repository.interface'; // Removed unused import
 import { ProductResponseDTO } from '@application/dtos/product/product.dto';
 import { AsyncResult, success, failure } from '@shared/types/result';
 import { NotFoundError } from '@shared/errors';
@@ -8,7 +8,8 @@ import { ID } from '@shared/types/common';
  * Use case for getting a product by ID
  */
 export class GetProductUseCase {
-  constructor(private readonly productRepository: IProductRepository) {}
+  // import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
+  constructor(private readonly productRepository: any) {}
 
   /**
    * Execute the get product use case

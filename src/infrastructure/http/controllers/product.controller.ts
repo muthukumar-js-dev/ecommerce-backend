@@ -102,4 +102,31 @@ export class ProductController {
       next(error);
     }
   }
+
+  /**
+   * Delete product
+   */
+  async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { productId } = req.params;
+      
+      if (!productId) {
+        return next(new Error('Product ID is required'));
+      }
+
+      const sellerId = (req as any).user?.userId || '';
+      const result = await this.productService.deleteProduct(productId, sellerId);
+
+      if (!result.success) {
+        return next(result.error);
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Product deleted successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

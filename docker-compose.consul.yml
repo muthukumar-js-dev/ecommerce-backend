@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  consul-server:
+    image: consul:1.16
+    container_name: consul-server
+    command: agent -server -ui -bootstrap-expect=1 -client=0.0.0.0
+    ports:
+      - "8500:8500"  # HTTP API
+      - "8600:8600/udp"  # DNS
+    environment:
+      CONSUL_BIND_INTERFACE: eth0
+    volumes:
+      - consul-data:/consul/data
+      - consul-config:/consul/config
+    networks:
+      - service-mesh
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "consul", "members"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  consul-agent-1:
+    image: consul:1.16
+    container_name: consul-agent-1
+    command: agent -client=0.0.0.0 -retry-join=consul-server
+    depends_on:
+      - consul-server
+    networks:
+      - service-mesh
+    restart: unless-stopped
+
+  consul-agent-2:
+    image: consul:1.16
+    container_name: consul-agent-2
+    command: agent -client=0.0.0.0 -retry-join=consul-server
+    depends_on:
+      - consul-server
+    networks:
+      - service-mesh
+    restart: unless-stopped
+
+networks:
+  service-mesh:
+    driver: bridge
+
+volumes:
+  consul-data:
+  consul-config:

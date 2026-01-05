@@ -20,6 +20,12 @@ import { createAddressRoutes } from './routes/address.routes';
 import { createWishlistRoutes } from './routes/wishlist.routes';
 import { createReviewRoutes } from './routes/review.routes';
 import { createNotificationRoutes } from './routes/notification.routes';
+import { eventDispatcherMiddleware } from '@infrastructure/events/event-dispatcher.middleware';
+import { createTracer } from '@infrastructure/tracing/jaeger-tracer';
+import { tracingMiddleware } from '@infrastructure/tracing/tracing.middleware';
+import { PrometheusMetrics } from '@infrastructure/metrics/prometheus-metrics';
+import { metricsMiddleware } from '@infrastructure/metrics/metrics.middleware';
+import { createLogger, loggingMiddleware } from '@infrastructure/logging/logger';
 
 import { setupSwagger } from './swagger';
 
@@ -35,15 +41,35 @@ export function createApp(): Application {
   app.use(corsMiddleware);
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use(express.urlencoded({ extended: true }));
   app.use(requestLogger);
+
+  // Monitoring middleware
+  const tracer = createTracer('core-service');
+  const metrics = new PrometheusMetrics('core-service');
+  const logger = createLogger('core-service');
+  app.use(tracingMiddleware(tracer));
+  app.use(metricsMiddleware(metrics));
+  app.use(loggingMiddleware(logger));
+
+  // Event Dispatcher Middleware
+  // Note: We need to access the CQRS module's event bus from the container. 
+  // Assuming container exposes it, or we rely on the implementation detail.
+  // For now, checking if Container has getEventBus().
+  // If not, we might need to expose it or instantiate here (which is less ideal).
+  // Checking Container implementation first is safer.
+
+
+  // Event Dispatcher Middleware
+  const cqrsModule = container.getCQRSModule();
+  app.use(eventDispatcherMiddleware(cqrsModule.eventBus));
 
   // Setup Swagger
   setupSwagger(app);
 
-  // Health check
-  app.get('/health', (_req, res) => {
-    res.json({ status: 'healthy', timestamp: new Date().toISOString() });
-  });
+  // Health check endpoints
+  const { createHealthRoute } = require('./health/health-check');
+  app.use(createHealthRoute());
 
   // Initialize controllers
   const userController = new UserController(container.getUserService());
@@ -64,6 +90,12 @@ export function createApp(): Application {
   app.use('/api/wishlist', createWishlistRoutes(wishlistController));
   app.use('/api/reviews', createReviewRoutes(reviewController));
   app.use('/api/notifications', createNotificationRoutes(notificationController));
+
+  // Metrics endpoint
+  app.get('/metrics', async (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    res.send(await metrics.getMetrics());
+  });
 
   // 404 handler
   app.use((_req, res) => {

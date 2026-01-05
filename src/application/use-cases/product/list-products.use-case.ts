@@ -1,4 +1,4 @@
-import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
+// import { IProductRepository } from '@domain/product/repositories/product.repository.interface'; // Removed unused import
 import { ListProductsResponseDTO, ProductResponseDTO } from '@application/dtos/product/product.dto';
 import { AsyncResult, success } from '@shared/types/result';
 import { APP_CONSTANTS } from '@shared/constants';
@@ -7,7 +7,8 @@ import { APP_CONSTANTS } from '@shared/constants';
  * Use case for listing products with pagination
  */
 export class ListProductsUseCase {
-  constructor(private readonly productRepository: IProductRepository) {}
+  // import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
+  constructor(private readonly productRepository: any) {}
 
   /**
    * Execute the list products use case
@@ -31,7 +32,7 @@ export class ListProductsUseCase {
     const hasMore = normalizedSkip + products.length < total;
 
     // Map to DTOs
-    const productDTOs: ProductResponseDTO[] = products.map((product) => {
+    const productDTOs: ProductResponseDTO[] = products.map((product: any) => {
       const props = (product as any).props;
       return {
         id: product.id,

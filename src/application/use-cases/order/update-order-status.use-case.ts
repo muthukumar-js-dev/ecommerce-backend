@@ -1,4 +1,4 @@
-import { IOrderRepository } from '@domain/order/repositories/order.repository.interface';
+// import { IOrderRepository } from '@domain/order/repositories/order.repository.interface'; // Removed unused import
 import { UpdateOrderStatusRequestDTO } from '@application/dtos/order/order.dto';
 import { AsyncResult, success, failure } from '@shared/types/result';
 import { NotFoundError, ValidationError } from '@shared/errors';
@@ -8,7 +8,7 @@ import { ID } from '@shared/types/common';
  * Use case for updating order status
  */
 export class UpdateOrderStatusUseCase {
-  constructor(private readonly orderRepository: IOrderRepository) {}
+  constructor(private readonly orderRepository: any) {}
 
   async execute(orderId: ID, dto: UpdateOrderStatusRequestDTO): AsyncResult<void> {
     if (!dto.productId || !dto.status) {

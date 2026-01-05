@@ -1,15 +1,46 @@
-import express, { Application, Request, Response } from 'express';
+import dotenv from 'dotenv';
+import { connectDatabase } from '@infrastructure/database/mongodb/connection';
+import { startServer } from '@infrastructure/http/server';
+import { initializeOutboxPublisher } from '@infrastructure/outbox-publisher.module';
+import { initializeConsumerGroups } from '@infrastructure/messaging/consumer-groups.module';
+import { ServiceRegistry } from '@infrastructure/service-mesh/service-registry';
 
-const app: Application = express();
-const PORT: number = parseInt(process.env.PORT ?? '3000', 10);
+// Load environment variables
+dotenv.config();
 
-app.get('/health', (_req: Request, res: Response): void => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+/**
+ * Main application entry point
+ */
+async function main(): Promise<void> {
+  try {
+    console.log('🚀 Starting E-Commerce Backend...');
+    console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
 
-app.listen(PORT, (): void => {
-  // eslint-disable-next-line no-console
-  console.log(`Server running on port ${PORT}`);
-});
+    // Connect to database
+    await connectDatabase();
 
-export default app;
+    // Initialize outbox publisher for reliable event publishing
+    await initializeOutboxPublisher();
+
+    // Initialize consumer groups for event consumption
+    await initializeConsumerGroups();
+
+    // Register with Consul
+    const serviceRegistry = new ServiceRegistry(
+      process.env.CONSUL_HOST,
+      process.env.CONSUL_PORT
+    );
+    const port = process.env.PORT || 3000;
+    await serviceRegistry.register('core-service', Number(port), '/health');
+    console.log('✓ Registered with Consul');
+
+    // Start HTTP server
+    startServer();
+  } catch (error) {
+    console.error('❌ Failed to start application:', error);
+    process.exit(1);
+  }
+}
+
+// Start the application
+main();

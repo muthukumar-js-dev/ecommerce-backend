@@ -1,10 +1,9 @@
-import { PlaceOrderUseCase } from '../use-cases/order/place-order.use-case';
-import { GetOrderUseCase } from '../use-cases/order/get-order.use-case';
-import { ListOrdersUseCase } from '../use-cases/order/list-orders.use-case';
-import { CancelOrderItemUseCase } from '../use-cases/order/cancel-order-item.use-case';
-import { UpdateOrderStatusUseCase } from '../use-cases/order/update-order-status.use-case';
-import { IOrderRepository } from '@domain/order/repositories/order.repository.interface';
-import { ICartRepository } from '@domain/cart/repositories/cart.repository.interface';
+import { BaseApplicationService } from './base-application.service';
+import { CommandBus } from '../commands/command-bus';
+import { QueryBus } from '../queries/query-bus';
+import { EventBus } from '@infrastructure/events/event-bus';
+import { PlaceOrderCommand } from '../commands/order/place-order.command';
+import { GetOrderHistoryQuery } from '../queries/order/get-order-history.query';
 import {
   PlaceOrderRequestDTO,
   OrderResponseDTO,
@@ -14,58 +13,56 @@ import {
 } from '../dtos/order/order.dto';
 import { AsyncResult } from '@shared/types/result';
 import { ID } from '@shared/types/common';
+import { LogExecution } from '../decorators/logging.decorator';
 
-/**
- * Application service for Order domain
- * Aggregates all order-related use cases
- */
-export class OrderService {
-  private placeOrderUseCase: PlaceOrderUseCase;
-  private getOrderUseCase: GetOrderUseCase;
-  private listOrdersUseCase: ListOrdersUseCase;
-  private cancelOrderItemUseCase: CancelOrderItemUseCase;
-  private updateOrderStatusUseCase: UpdateOrderStatusUseCase;
-
-  constructor(orderRepository: IOrderRepository, cartRepository: ICartRepository) {
-    this.placeOrderUseCase = new PlaceOrderUseCase(orderRepository, cartRepository);
-    this.getOrderUseCase = new GetOrderUseCase(orderRepository);
-    this.listOrdersUseCase = new ListOrdersUseCase(orderRepository);
-    this.cancelOrderItemUseCase = new CancelOrderItemUseCase(orderRepository);
-    this.updateOrderStatusUseCase = new UpdateOrderStatusUseCase(orderRepository);
+export class OrderService extends BaseApplicationService {
+  constructor(
+    commandBus: CommandBus,
+    queryBus: QueryBus,
+    eventBus: EventBus
+  ) {
+    super(commandBus, queryBus, eventBus);
   }
 
   /**
    * Place an order from cart
    */
+  @LogExecution()
   async placeOrder(userId: ID, dto: PlaceOrderRequestDTO): AsyncResult<OrderResponseDTO> {
-    return this.placeOrderUseCase.execute(userId, dto);
+    const command = new PlaceOrderCommand(userId, dto.shippingAddressId, dto.paymentMethod);
+    return this.executeCommand<AsyncResult<OrderResponseDTO>>(command);
   }
 
   /**
    * Get order by ID
    */
+  @LogExecution()
   async getOrder(orderId: ID): AsyncResult<OrderResponseDTO> {
-    return this.getOrderUseCase.execute(orderId);
+    throw new Error("Method not implemented.");
   }
 
   /**
    * List user's orders
    */
+  @LogExecution()
   async listOrders(userId: ID, skip?: number, limit?: number): AsyncResult<ListOrdersResponseDTO> {
-    return this.listOrdersUseCase.execute(userId, skip, limit);
+    const query = new GetOrderHistoryQuery(userId);
+    return this.executeQuery<AsyncResult<ListOrdersResponseDTO>>(query);
   }
 
   /**
    * Cancel an order item
    */
+  @LogExecution()
   async cancelOrderItem(orderId: ID, dto: CancelOrderItemRequestDTO): AsyncResult<void> {
-    return this.cancelOrderItemUseCase.execute(orderId, dto);
+    throw new Error("Method not implemented.");
   }
 
   /**
    * Update order status
    */
+  @LogExecution()
   async updateOrderStatus(orderId: ID, dto: UpdateOrderStatusRequestDTO): AsyncResult<void> {
-    return this.updateOrderStatusUseCase.execute(orderId, dto);
+    throw new Error("Method not implemented.");
   }
 }

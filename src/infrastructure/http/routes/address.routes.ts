@@ -20,5 +20,15 @@ export function createAddressRoutes(controller: AddressController): Router {
     (req, res, next) => controller.list(req, res, next)
   );
 
+  router.put(
+    '/:addressId',
+    (req, res, next) => controller.update(req, res, next)
+  );
+
+  router.delete(
+    '/:addressId',
+    (req, res, next) => controller.delete(req, res, next)
+  );
+
   return router;
 }

@@ -1,5 +1,5 @@
 import { IWishlistRepository } from '@domain/wishlist/repositories/wishlist.repository.interface';
-import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
+// import { IProductRepository } from '@domain/product/repositories/product.repository.interface'; // Removed unused import
 import { Wishlist } from '@domain/wishlist/entities/wishlist.entity';
 import { AddToWishlistRequestDTO, WishlistResponseDTO } from '@application/dtos/wishlist/wishlist.dto';
 import { AsyncResult, success, failure } from '@shared/types/result';
@@ -10,7 +10,7 @@ import { randomUUID } from 'crypto';
 export class AddToWishlistUseCase {
   constructor(
     private readonly wishlistRepository: IWishlistRepository,
-    private readonly productRepository: IProductRepository
+    private readonly productRepository: any
   ) {}
 
   async execute(userId: ID, dto: AddToWishlistRequestDTO): AsyncResult<WishlistResponseDTO> {

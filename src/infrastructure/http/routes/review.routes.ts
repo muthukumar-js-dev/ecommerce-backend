@@ -15,5 +15,15 @@ export function createReviewRoutes(controller: ReviewController): Router {
     (req, res, next) => controller.create(req, res, next)
   );
 
+  router.put(
+    '/:reviewId',
+    (req, res, next) => controller.update(req, res, next)
+  );
+
+  router.delete(
+    '/:reviewId',
+    (req, res, next) => controller.delete(req, res, next)
+  );
+
   return router;
 }

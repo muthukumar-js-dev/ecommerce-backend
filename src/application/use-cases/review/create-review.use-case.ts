@@ -1,5 +1,5 @@
 import { IReviewRepository } from '@domain/review/repositories/review.repository.interface';
-import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
+// import { IProductRepository } from '@domain/product/repositories/product.repository.interface'; // Removed unused import
 import { Review } from '@domain/review/entities/review.entity';
 import { CreateReviewRequestDTO, ReviewResponseDTO } from '@application/dtos/review/review.dto';
 import { AsyncResult, success, failure, Result } from '@shared/types/result';
@@ -10,7 +10,7 @@ import { randomUUID } from 'crypto';
 export class CreateReviewUseCase {
   constructor(
     private readonly reviewRepository: IReviewRepository,
-    private readonly productRepository: IProductRepository
+    private readonly productRepository: any
   ) {}
 
   async execute(userId: ID, dto: CreateReviewRequestDTO): AsyncResult<ReviewResponseDTO> {

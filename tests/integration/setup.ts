@@ -12,9 +12,22 @@ let app: Application;
  */
 export async function setupIntegrationTests(): Promise<Application> {
   try {
-    const mongoUri = process.env.MONGO_URI;
+    let mongoUri = process.env.MONGO_URI;
+
+    // If not in env (worker process), try reading from file shared by global setup
     if (!mongoUri) {
-        throw new Error('MONGO_URI not defined in environment. Check global-setup.js');
+      const fs = require('fs');
+      const path = require('path');
+      const uriPath = path.join(__dirname, '..', 'mongo-uri.json'); // Up one level to tests/ dir
+      if (fs.existsSync(uriPath)) {
+        const config = JSON.parse(fs.readFileSync(uriPath, 'utf8'));
+        mongoUri = config.mongoUri;
+        process.env.MONGO_URI = mongoUri;
+      }
+    }
+
+    if (!mongoUri) {
+      throw new Error('MONGO_URI not defined in environment or config file. Check global-setup.js');
     }
 
     // Connect Mongoose via helper
@@ -42,4 +55,51 @@ export async function teardownIntegrationTests(): Promise<void> {
  */
 export async function clearDatabase(): Promise<void> {
   await clearTestDB();
+}
+
+/**
+ * Sleep utility for async operations
+ */
+export function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Create test user data
+ */
+export function createTestUser() {
+  return {
+    name: 'Test User',
+    email: `test-${Date.now()}@example.com`,
+    password: 'Password123!',
+  };
+}
+
+/**
+ * Create test product data
+ */
+export function createTestProduct() {
+  return {
+    title: `Test Product ${Date.now()}`,
+    description: 'Test product description',
+    price: 1000,
+    inventory: 100,
+    category: 'Electronics',
+  };
+}
+
+/**
+ * Create test order data
+ */
+export function createTestOrder() {
+  return {
+    shippingAddress: {
+      street: '123 Test St',
+      city: 'Test City',
+      state: 'TS',
+      postalCode: '12345',
+      country: 'Test Country',
+    },
+    paymentMethodId: 'pm_test_123',
+  };
 }

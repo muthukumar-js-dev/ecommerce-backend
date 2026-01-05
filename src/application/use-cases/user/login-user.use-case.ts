@@ -1,4 +1,6 @@
 import { IUserRepository } from '@domain/user/repositories/user.repository.interface';
+
+import { Email } from '@domain/user/value-objects/email.vo';
 import {
   LoginUserRequestDTO,
   LoginUserResponseDTO,
@@ -6,7 +8,6 @@ import {
 import { AsyncResult, success, failure } from '@shared/types/result';
 import { AuthenticationError, ValidationError } from '@shared/errors';
 import { APP_CONSTANTS } from '@shared/constants';
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 /**
@@ -32,44 +33,60 @@ export class LoginUserUseCase {
       );
     }
 
-    // Find user
-    const user = await this.userRepository.findByEmail(dto.email);
-    if (!user) {
-      return failure(new AuthenticationError('Invalid email or password'));
+    try {
+      // Create Email VO (handles validation)
+      const email = Email.create(dto.email);
+
+      // Find user
+      const user = await this.userRepository.findByEmail(email);
+      if (!user) {
+        return failure(new AuthenticationError('Invalid email or password'));
+      }
+
+      // Verify password using aggregate method
+      const isPasswordValid = await user.verifyPassword(dto.password);
+      if (!isPasswordValid) {
+        return failure(new AuthenticationError('Invalid email or password'));
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        {
+          userId: user.id,
+          email: user.email.value,
+          role: user.role,
+        },
+        this.jwtSecret,
+        { expiresIn: APP_CONSTANTS.JWT_EXPIRY }
+      );
+
+      // Update last login
+      user.recordLogin();
+      await this.userRepository.update(user);
+
+      // Return response
+      return success({
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email.value,
+          role: user.role,
+        },
+        token,
+        expiresIn: APP_CONSTANTS.JWT_EXPIRY,
+      });
+
+    } catch (error) {
+       // If Email.create throws ValidationError, catch it?
+       // Or usually AuthenticationError is safer to return for login failures
+       // regardless of reason to avoid enumeration?
+       // But if email format is invalid, returning Validation error is fine.
+       if (error instanceof ValidationError) {
+         return failure(new AuthenticationError('Invalid email or password')); // obscure specific error?
+         // Or just return validation error.
+         // return failure(error);
+       }
+       return failure(new AuthenticationError('Invalid email or password'));
     }
-
-    // Verify password
-    const props = (user as any).props;
-    const isPasswordValid = await bcrypt.compare(dto.password, props.passwordHash);
-    if (!isPasswordValid) {
-      return failure(new AuthenticationError('Invalid email or password'));
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      {
-        userId: user.id,
-        email: props.email,
-        role: props.role,
-      },
-      this.jwtSecret,
-      { expiresIn: APP_CONSTANTS.JWT_EXPIRY }
-    );
-
-    // Update last login
-    user.updateLastLogin();
-    await this.userRepository.update(user);
-
-    // Return response
-    return success({
-      user: {
-        id: user.id,
-        name: props.name,
-        email: props.email,
-        role: props.role,
-      },
-      token,
-      expiresIn: APP_CONSTANTS.JWT_EXPIRY,
-    });
   }
 }

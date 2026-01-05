@@ -3,17 +3,17 @@
  * Value objects are immutable and compared by value, not identity
  */
 export abstract class ValueObject<T> {
-  protected readonly value: T;
+  protected readonly _value: T;
 
   constructor(value: T) {
-    this.value = Object.freeze(value);
+    this._value = Object.freeze(value);
   }
 
   /**
    * Get the raw value
    */
   getValue(): T {
-    return this.value;
+    return this._value;
   }
 
   /**
@@ -26,13 +26,13 @@ export abstract class ValueObject<T> {
     if (other.constructor !== this.constructor) {
       return false;
     }
-    return JSON.stringify(this.value) === JSON.stringify(other.value);
+    return JSON.stringify(this._value) === JSON.stringify(other._value);
   }
 
   /**
    * Convert to string
    */
   toString(): string {
-    return JSON.stringify(this.value);
+    return JSON.stringify(this._value);
   }
 }

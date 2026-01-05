@@ -1,0 +1,154 @@
+import { IUserRepository } from '@domain/user/repositories/user.repository.interface';
+import { User } from '@domain/user/aggregates/user.aggregate';
+import { UserModel } from '../schemas/user.schema';
+import { ID } from '@shared/types/common';
+import { Email } from '@domain/user/value-objects/email.vo';
+import { Result, success, failure } from '@shared/types/result';
+import { DatabaseError } from '@shared/errors';
+import { OutboxRepository } from './outbox.repository';
+import { KafkaTopic } from '../../../messaging/kafka/topics';
+import mongoose from 'mongoose';
+
+/**
+ * Example: User Repository with Transactional Outbox Pattern
+ * 
+ * This shows how to integrate the outbox pattern with existing repositories.
+ * The key is to use MongoDB transactions to save both the aggregate and events atomically.
+ */
+export class UserRepositoryWithOutbox implements IUserRepository {
+    constructor(private outboxRepository: OutboxRepository) { }
+
+    /**
+     * Save user with transactional outbox pattern
+     * 
+     * Steps:
+     * 1. Start MongoDB transaction
+     * 2. Save user to database
+     * 3. Save domain events to outbox
+     * 4. Commit transaction
+     * 5. Clear domain events from aggregate
+     */
+    async save(user: User): Promise<Result<User>> {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        try {
+            // 1. Save user to database (within transaction)
+            const persistenceData = this.toPersistence(user);
+            const doc = new UserModel(persistenceData);
+            await doc.save({ session });
+
+            // 2. Save domain events to outbox (within same transaction)
+            for (const event of user.domainEvents) {
+                await this.outboxRepository.save(event, KafkaTopic.USER_EVENTS, session);
+            }
+
+            // 3. Commit transaction
+            await session.commitTransaction();
+
+            // 4. Clear domain events (they're now in outbox)
+            user.clearDomainEvents();
+
+            return success(user);
+        } catch (error: any) {
+            // Rollback on error
+            await session.abortTransaction();
+
+            if (error.code === 11000) {
+                return failure(
+                    new DatabaseError('Email already exists', 'USER_DUPLICATE_EMAIL', error)
+                );
+            }
+
+            return failure(new DatabaseError('Failed to save user', 'USER_SAVE_ERROR', error));
+        } finally {
+            session.endSession();
+        }
+    }
+
+    /**
+     * Update user with transactional outbox pattern
+     */
+    async update(user: User): Promise<Result<User>> {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        try {
+            // 1. Update user in database
+            const doc = await UserModel.findByIdAndUpdate(
+                user.id,
+                this.toPersistence(user),
+                { new: true, runValidators: true, session }
+            ).exec();
+
+            if (!doc) {
+                await session.abortTransaction();
+                return failure(new DatabaseError('User not found', 'USER_NOT_FOUND'));
+            }
+
+            // 2. Save domain events to outbox
+            for (const event of user.domainEvents) {
+                await this.outboxRepository.save(event, KafkaTopic.USER_EVENTS, session);
+            }
+
+            // 3. Commit transaction
+            await session.commitTransaction();
+
+            // 4. Clear domain events
+            user.clearDomainEvents();
+
+            return success(user);
+        } catch (error: any) {
+            await session.abortTransaction();
+            return failure(new DatabaseError('Failed to update user', 'USER_UPDATE_ERROR', error));
+        } finally {
+            session.endSession();
+        }
+    }
+
+    // ... other methods (findById, findByEmail, etc.) remain unchanged
+
+    private toPersistence(user: User): any {
+        return {
+            _id: user.id,
+            name: user.name,
+            email: user.email.value,
+            passwordHash: user.passwordHash,
+            role: user.role,
+            isActive: user.isActive,
+            phoneNumber: user.phoneNumber?.value,
+            stripeCustomerId: user.stripeCustomerId,
+            shopName: user.shopName,
+            shopAddress: user.shopAddress,
+            currentOrderCount: user.currentOrderCount,
+            returnCount: user.returnCount,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+        };
+    }
+
+    async findById(id: ID): Promise<User | null> {
+        // Implementation remains the same as original repository
+        throw new Error('Not implemented in example');
+    }
+
+    async findByEmail(email: Email): Promise<User | null> {
+        // Implementation remains the same as original repository
+        throw new Error('Not implemented in example');
+    }
+
+    async findByStripeCustomerId(stripeCustomerId: string): Promise<User | null> {
+        // Implementation remains the same as original repository
+        throw new Error('Not implemented in example');
+    }
+
+    async delete(id: ID): Promise<Result<void>> {
+        // Implementation remains the same as original repository
+        throw new Error('Not implemented in example');
+    }
+
+    async exists(id: ID): Promise<boolean> {
+        // Implementation remains the same as original repository
+        throw new Error('Not implemented in example');
+    }
+}

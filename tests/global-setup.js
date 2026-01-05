@@ -16,8 +16,8 @@ module.exports = async function globalSetup() {
   global.__MONGOINSTANCE = instance;
   process.env.MONGO_URI = uri;
   
-  // Also write to a temp file for test suites to pick up if env vars don't propagate?
-  // Jest globalSetup runs in a separate process? No, usually main process.
-  // Test suites run in workers. Workers receive process.env COPY.
-  // So process.env modification here SHOULD propagate if Jest handles it correctly.
+  // Write to file for test workers to read
+  const fs = require('fs');
+  const path = require('path');
+  fs.writeFileSync(path.join(__dirname, 'mongo-uri.json'), JSON.stringify({ mongoUri: uri }));
 };

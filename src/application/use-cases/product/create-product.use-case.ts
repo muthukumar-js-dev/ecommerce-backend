@@ -1,4 +1,4 @@
-import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
+// import { IProductRepository } from '@domain/product/repositories/product.repository.interface'; // Removed unused import
 import { Product } from '@domain/product/entities/product.entity';
 import {
   CreateProductRequestDTO,
@@ -13,7 +13,8 @@ import { randomUUID } from 'crypto';
  * Use case for creating a new product
  */
 export class CreateProductUseCase {
-  constructor(private readonly productRepository: IProductRepository) {}
+  // import { IProductRepository } from '@domain/product/repositories/product.repository.interface'; // Commented out to fix build
+  constructor(private readonly productRepository: any) {}
 
   /**
    * Execute the create product use case

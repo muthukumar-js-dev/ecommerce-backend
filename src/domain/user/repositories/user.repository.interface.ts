@@ -1,5 +1,6 @@
-import { User } from '../entities/user.entity';
-import { ID, Email } from '@shared/types/common';
+import { User } from '../aggregates/user.aggregate';
+import { ID } from '@shared/types/common';
+import { Email } from '../value-objects/email.vo';
 import { Result } from '@shared/types/result';
 
 /**

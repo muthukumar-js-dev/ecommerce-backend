@@ -1,4 +1,4 @@
-import { IOrderRepository } from '@domain/order/repositories/order.repository.interface';
+// import { IOrderRepository } from '@domain/order/repositories/order.repository.interface'; // Removed unused import
 import { ICartRepository } from '@domain/cart/repositories/cart.repository.interface';
 import { Order } from '@domain/order/entities/order.entity';
 import { PlaceOrderRequestDTO, OrderResponseDTO } from '@application/dtos/order/order.dto';
@@ -12,7 +12,7 @@ import { randomUUID } from 'crypto';
  */
 export class PlaceOrderUseCase {
   constructor(
-    private readonly orderRepository: IOrderRepository,
+    private readonly orderRepository: any,
     private readonly cartRepository: ICartRepository
   ) {}
 

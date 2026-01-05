@@ -23,5 +23,15 @@ export function createNotificationRoutes(controller: NotificationController): Ro
     (req, res, next) => controller.list(req, res, next)
   );
 
+  router.patch(
+    '/:notificationId/read',
+    (req, res, next) => controller.markAsRead(req, res, next)
+  );
+
+  router.delete(
+    '/:notificationId',
+    (req, res, next) => controller.delete(req, res, next)
+  );
+
   return router;
 }

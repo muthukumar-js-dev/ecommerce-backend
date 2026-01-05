@@ -15,5 +15,10 @@ export function createWishlistRoutes(controller: WishlistController): Router {
     (req, res, next) => controller.addProduct(req, res, next)
   );
 
+  router.delete(
+    '/:productId',
+    (req, res, next) => controller.removeProduct(req, res, next)
+  );
+
   return router;
 }

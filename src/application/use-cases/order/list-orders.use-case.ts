@@ -1,4 +1,4 @@
-import { IOrderRepository } from '@domain/order/repositories/order.repository.interface';
+// import { IOrderRepository } from '@domain/order/repositories/order.repository.interface'; // Removed unused import
 import { ListOrdersResponseDTO, OrderResponseDTO } from '@application/dtos/order/order.dto';
 import { AsyncResult, success } from '@shared/types/result';
 import { ID } from '@shared/types/common';
@@ -8,7 +8,7 @@ import { APP_CONSTANTS } from '@shared/constants';
  * Use case for listing user's orders with pagination
  */
 export class ListOrdersUseCase {
-  constructor(private readonly orderRepository: IOrderRepository) {}
+  constructor(private readonly orderRepository: any) {}
 
   /**
    * Execute the list orders use case
@@ -34,7 +34,7 @@ export class ListOrdersUseCase {
     const hasMore = normalizedSkip + orders.length < total;
 
     // Map to DTOs
-    const orderDTOs: OrderResponseDTO[] = orders.map((order) => {
+    const orderDTOs: OrderResponseDTO[] = orders.map((order: any) => {
       const props = (order as any).props;
       return {
         id: order.id,

@@ -1,4 +1,4 @@
-import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
+// import { IProductRepository } from '@domain/product/repositories/product.repository.interface'; // Removed unused import
 import { UpdateProductRequestDTO } from '@application/dtos/product/product.dto';
 import { AsyncResult, success, failure } from '@shared/types/result';
 import { NotFoundError } from '@shared/errors';
@@ -8,7 +8,8 @@ import { ID } from '@shared/types/common';
  * Use case for updating a product
  */
 export class UpdateProductUseCase {
-  constructor(private readonly productRepository: IProductRepository) {}
+  // import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
+  constructor(private readonly productRepository: any) {}
 
   async execute(productId: ID, dto: UpdateProductRequestDTO): AsyncResult<void> {
     const product = await this.productRepository.findById(productId);

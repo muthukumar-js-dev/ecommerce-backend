@@ -1,0 +1,89 @@
+config:
+  target: 'http://localhost:8000'  # Kong API Gateway
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: 'Warm up'
+    - duration: 300
+      arrivalRate: 50
+      name: 'Sustained load'
+    - duration: 60
+      arrivalRate: 100
+      name: 'Spike test'
+  processor: './processor.js'
+  defaults:
+    headers:
+      Content-Type: 'application/json'
+
+scenarios:
+  - name: 'Complete Order Flow'
+    weight: 70
+    flow:
+      # 1. Login
+      - post:
+          url: '/api/users/login'
+          json:
+            email: 'test{{ $randomNumber(1, 1000) }}@example.com'
+            password: 'Password123'
+          capture:
+            - json: '$.token'
+              as: 'token'
+            - json: '$.userId'
+              as: 'userId'
+
+      # 2. Browse products
+      - get:
+          url: '/api/products'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+          capture:
+            - json: '$.products[0].id'
+              as: 'productId'
+
+      # 3. Add to cart
+      - post:
+          url: '/api/cart/add'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+          json:
+            productId: '{{ productId }}'
+            quantity: 2
+
+      # 4. Get cart
+      - get:
+          url: '/api/cart'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+
+      # 5. Place order
+      - post:
+          url: '/api/orders'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+          json:
+            shippingAddress:
+              street: '123 Test St'
+              city: 'Test City'
+              state: 'TS'
+              postalCode: '12345'
+              country: 'Test Country'
+            paymentMethodId: 'pm_test_{{ $randomString(10) }}'
+
+  - name: 'Product Browsing'
+    weight: 20
+    flow:
+      - get:
+          url: '/api/products'
+
+      - get:
+          url: '/api/products/{{ $randomNumber(1, 100) }}'
+
+  - name: 'User Registration'
+    weight: 10
+    flow:
+      - post:
+          url: '/api/users/register'
+          json:
+            name: 'Test User {{ $randomNumber(1, 10000) }}'
+            email: 'user{{ $randomNumber(1, 10000) }}@example.com'
+            password: 'Password123!'

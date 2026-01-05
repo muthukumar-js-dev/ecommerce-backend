@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f4f4f4; padding: 20px; }
+    .container { background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .header { background-color: #8BC34A; color: white; padding: 30px 20px; text-align: center; }
+    .header h1 { margin: 0; font-size: 28px; }
+    .content { padding: 30px 20px; }
+    .success-icon { font-size: 60px; text-align: center; margin: 20px 0; }
+    .delivery-box { background-color: #f1f8e9; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #8BC34A; }
+    .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; background-color: #f4f4f4; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>✅ Order Delivered!</h1>
+    </div>
+    <div class="content">
+      <div class="success-icon">🎉</div>
+      <h2 style="text-align: center;">Hi {{customerName}},</h2>
+      <p style="text-align: center;">Your order <strong>{{orderNumber}}</strong> has been successfully delivered!</p>
+      
+      <div class="delivery-box">
+        <p><strong>Delivered On:</strong> {{formatDate deliveredAt}}</p>
+        <p><strong>Delivered To:</strong> {{shippingAddress.recipientName}}</p>
+        <p><strong>Location:</strong> {{shippingAddress.city}}, {{shippingAddress.state}}</p>
+      </div>
+      
+      <p>We hope you love your purchase! If you have any issues with your order, please contact our support team.</p>
+      <p style="margin-top: 30px;"><strong>Enjoyed your experience?</strong> We'd love to hear your feedback!</p>
+    </div>
+    <div class="footer">
+      <p>Questions? Contact us at support@example.com</p>
+      <p>&copy; 2026 E-Commerce Platform. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -51,4 +51,60 @@ export class NotificationController {
       next(error);
     }
   }
+
+  /**
+   * Mark notification as read
+   */
+  async markAsRead(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const userId = authReq.user.id;
+      const { notificationId } = req.params;
+
+      if (!notificationId) {
+        return next(new Error('Notification ID is required'));
+      }
+
+      const result = await this.notificationService.markAsRead(userId, notificationId);
+
+      if (!result.success) {
+        return next(result.error);
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Notification marked as read',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Delete notification
+   */
+  async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const userId = authReq.user.id;
+      const { notificationId } = req.params;
+
+      if (!notificationId) {
+        return next(new Error('Notification ID is required'));
+      }
+
+      const result = await this.notificationService.deleteNotification(userId, notificationId);
+
+      if (!result.success) {
+        return next(result.error);
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Notification deleted successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

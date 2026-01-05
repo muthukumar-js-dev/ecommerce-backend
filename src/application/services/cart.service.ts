@@ -4,7 +4,7 @@ import { RemoveFromCartUseCase } from '../use-cases/cart/remove-from-cart.use-ca
 import { UpdateCartItemQuantityUseCase } from '../use-cases/cart/update-cart-item-quantity.use-case';
 import { ClearCartUseCase } from '../use-cases/cart/clear-cart.use-case';
 import { ICartRepository } from '@domain/cart/repositories/cart.repository.interface';
-import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
+// import { IProductRepository } from '@domain/product/repositories/product.repository.interface'; // Removed unused import
 import { AddToCartRequestDTO, UpdateCartItemRequestDTO, CartResponseDTO } from '../dtos/cart/cart.dto';
 import { AsyncResult } from '@shared/types/result';
 import { ID } from '@shared/types/common';
@@ -22,7 +22,7 @@ export class CartService {
 
   constructor(
     cartRepository: ICartRepository,
-    productRepository: IProductRepository
+    productRepository: any
   ) {
     this.addToCartUseCase = new AddToCartUseCase(cartRepository, productRepository);
     this.getCartUseCase = new GetCartUseCase(cartRepository);

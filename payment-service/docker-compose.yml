@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  payment-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: payment-service
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - MONGODB_URI=mongodb://payment-mongo:27017/payment-service
+      - KAFKA_BROKERS=kafka:29092
+      - KAFKA_CLIENT_ID=payment-service
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+    depends_on:
+      - payment-mongo
+      - kafka
+    networks:
+      - payment-network
+      - ecommerce-network
+    restart: unless-stopped
+
+  payment-mongo:
+    image: mongo:6
+    container_name: payment-mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - payment-db-data:/data/db
+    networks:
+      - payment-network
+    restart: unless-stopped
+
+  # Reference to existing Kafka (should be in main docker-compose)
+  kafka:
+    external: true
+
+volumes:
+  payment-db-data:
+    driver: local
+
+networks:
+  payment-network:
+    driver: bridge
+  ecommerce-network:
+    external: true

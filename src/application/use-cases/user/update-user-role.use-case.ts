@@ -28,9 +28,15 @@ export class UpdateUserRoleUseCase {
       return failure(new NotFoundError('User', userId));
     }
 
-    // Update role via props (entity doesn't have updateRole method)
-    (user as any).props.role = dto.role;
-    (user as any).props.updatedAt = new Date();
+    // Update role using aggregate method
+    // 'changedBy' is required. Using userId (self-change?) or system.
+    // In real app, we should pass the ID of the admin performing the action.
+    // For now using userId as placeholder or "SYSTEM".
+    try {
+        user.changeRole(dto.role, userId);
+    } catch (error) {
+        return failure(error as Error);
+    }
 
     const updateResult = await this.userRepository.update(user);
     if (!updateResult.success) {
