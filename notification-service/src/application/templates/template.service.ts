@@ -1,7 +1,7 @@
 import Handlebars from 'handlebars';
 import fs from 'fs/promises';
 import path from 'path';
-import { NotificationType } from '@domain/notification.entity';
+import { NotificationType } from '../../domain/notification.entity';
 
 /**
  * Template Service

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { JaegerTracer } from 'jaeger-client';
-import { FORMAT_HTTP_HEADERS, Span } from 'opentracing';
+import { FORMAT_HTTP_HEADERS } from 'opentracing';
 
 /**
  * Tracing middleware for Express

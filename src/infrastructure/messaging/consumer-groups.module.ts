@@ -103,12 +103,16 @@ export async function initializeConsumerGroups(): Promise<void> {
     await module.startAll();
 
     // Graceful shutdown
-    process.on('SIGTERM', async () => {
-        await module.stopAll();
+    process.on('SIGTERM', () => {
+        void (async () => {
+            await module.stopAll();
+        })();
     });
 
-    process.on('SIGINT', async () => {
-        await module.stopAll();
-        process.exit(0);
+    process.on('SIGINT', () => {
+        void (async () => {
+            await module.stopAll();
+            process.exit(0);
+        })();
     });
 }

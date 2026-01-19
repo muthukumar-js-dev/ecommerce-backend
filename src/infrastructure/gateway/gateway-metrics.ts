@@ -89,7 +89,7 @@ export class GatewayMetrics {
         try {
             const service = await this.kongClient.getService(serviceName);
             return service.enabled !== false;
-        } catch (error) {
+        } catch {
             return false;
         }
     }

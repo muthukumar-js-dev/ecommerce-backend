@@ -32,20 +32,20 @@ export class ProductCreatedConsumerHandler extends BaseEventHandler {
 
         // Update product read model
         await this.productReadRepo.create({
-            productId: event.productId,
-            name: event.name,
+            id: event.productId,
+            pid: event.sku,
+            title: event.name,
             description: event.description,
-            sku: event.sku,
-            price: event.price,
-            currency: event.currency,
-            quantity: event.quantity,
             category: event.category,
-            seller: event.seller,
+            brand: 'Generic', // Default branding or extract from payload if available
+            price: event.price,
             images: event.images,
-            isActive: true,
+            sellerId: event.seller,
+            averageRating: 0,
+            outOfStock: false,
             createdAt: new Date(event.createdAt),
             updatedAt: new Date(),
-        });
+        } as any); // Cast as any to avoid strict type checks on missing optional fields like brand if not in payload
 
         console.log(`  ✓ Product read model created for: ${event.name} (${event.sku})`);
     }

@@ -1,0 +1,116 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ecommerce-prod
+  region: ap-south-1
+  version: "1.28"
+
+vpc:
+  cidr: 10.0.0.0/16
+  nat:
+    gateway: HighlyAvailable
+  clusterEndpoints:
+    publicAccess: true
+    privateAccess: true
+
+managedNodeGroups:
+  - name: core-services
+    instanceType: t3.large
+    desiredCapacity: 3
+    minSize: 3
+    maxSize: 10
+    volumeSize: 100
+    volumeType: gp3
+    labels:
+      role: core
+      nodegroup-type: core-services
+    tags:
+      nodegroup-role: core-services
+      environment: production
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        cloudWatch: true
+        ebs: true
+        efs: true
+        albIngress: true
+    privateNetworking: true
+
+  - name: worker-services
+    instanceType: t3.medium
+    desiredCapacity: 5
+    minSize: 3
+    maxSize: 20
+    volumeSize: 50
+    volumeType: gp3
+    labels:
+      role: worker
+      nodegroup-type: worker-services
+    tags:
+      nodegroup-role: worker-services
+      environment: production
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        cloudWatch: true
+    privateNetworking: true
+
+addons:
+  - name: vpc-cni
+    version: latest
+  - name: coredns
+    version: latest
+  - name: kube-proxy
+    version: latest
+  - name: aws-ebs-csi-driver
+    version: latest
+    attachPolicyARNs:
+      - arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+    - metadata:
+        name: ecommerce-sa
+        namespace: ecommerce-prod
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonSESFullAccess
+        - arn:aws:iam::aws:policy/CloudWatchFullAccess
+      tags:
+        service: ecommerce-backend
+        environment: production
+
+    - metadata:
+        name: cluster-autoscaler
+        namespace: kube-system
+      attachPolicy:
+        Statement:
+          - Effect: Allow
+            Action:
+              - autoscaling:DescribeAutoScalingGroups
+              - autoscaling:DescribeAutoScalingInstances
+              - autoscaling:DescribeLaunchConfigurations
+              - autoscaling:DescribeScalingActivities
+              - autoscaling:DescribeTags
+              - ec2:DescribeInstanceTypes
+              - ec2:DescribeLaunchTemplateVersions
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - autoscaling:SetDesiredCapacity
+              - autoscaling:TerminateInstanceInAutoScalingGroup
+              - ec2:DescribeImages
+              - ec2:GetInstanceTypesFromInstanceRequirements
+              - eks:DescribeNodegroup
+            Resource: "*"
+
+cloudWatch:
+  clusterLogging:
+    enableTypes:
+      - api
+      - audit
+      - authenticator
+      - controllerManager
+      - scheduler

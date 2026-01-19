@@ -33,16 +33,18 @@ export class OutboxPublisherModule {
         await this.publisher.start();
 
         // Setup periodic cleanup of old events (daily)
-        this.cleanupInterval = setInterval(async () => {
-            try {
-                const daysOld = parseInt(process.env.OUTBOX_CLEANUP_DAYS || '30');
-                const deleted = await outboxRepository.deleteOldEvents(daysOld);
-                if (deleted > 0) {
-                    console.log(`🧹 Cleaned up ${deleted} old outbox events`);
+        this.cleanupInterval = setInterval(() => {
+            void (async () => {
+                try {
+                    const daysOld = parseInt(process.env.OUTBOX_CLEANUP_DAYS || '30');
+                    const deleted = await outboxRepository.deleteOldEvents(daysOld);
+                    if (deleted > 0) {
+                        console.log(`🧹 Cleaned up ${deleted} old outbox events`);
+                    }
+                } catch (error) {
+                    console.error('❌ Error cleaning up outbox events:', error);
                 }
-            } catch (error) {
-                console.error('❌ Error cleaning up outbox events:', error);
-            }
+            })();
         }, 24 * 60 * 60 * 1000); // 24 hours
 
         console.log('✅ Outbox Publisher Module started successfully');
@@ -100,12 +102,16 @@ export async function initializeOutboxPublisher(): Promise<void> {
     await module.start();
 
     // Graceful shutdown
-    process.on('SIGTERM', async () => {
-        await module.stop();
+    process.on('SIGTERM', () => {
+        void (async () => {
+            await module.stop();
+        })();
     });
 
-    process.on('SIGINT', async () => {
-        await module.stop();
-        process.exit(0);
+    process.on('SIGINT', () => {
+        void (async () => {
+            await module.stop();
+            process.exit(0);
+        })();
     });
 }

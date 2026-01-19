@@ -67,7 +67,7 @@ export class PaymentController {
      */
     async capturePayment(req: Request, res: Response): Promise<void> {
         try {
-            const { paymentId } = req.params;
+            const paymentId = req.params.paymentId as string;
 
             const command = new CapturePaymentCommand(paymentId);
             const result = await this.capturePaymentHandler.handle(command);
@@ -132,7 +132,7 @@ export class PaymentController {
      */
     async getPayment(req: Request, res: Response): Promise<void> {
         try {
-            const { paymentId } = req.params;
+            const paymentId = req.params.paymentId as string;
 
             const query = new GetPaymentQuery(paymentId);
             const result = await this.getPaymentHandler.handle(query);
@@ -162,7 +162,7 @@ export class PaymentController {
      * POST /api/payments/webhook/stripe
      * Handle Stripe webhook events
      */
-    async handleStripeWebhook(req: Request, res: Response): Promise<void> {
+    handleStripeWebhook(req: Request, res: Response): void {
         try {
             const signature = req.headers['stripe-signature'] as string;
             const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
@@ -191,8 +191,8 @@ export class PaymentController {
             }
 
             res.status(200).json({ received: true });
-        } catch (error: any) {
-            console.error('Webhook error:', error.message);
+        } catch (_error: any) {
+            console.error('Webhook error:', _error.message);
             res.status(400).json({
                 success: false,
                 error: 'Webhook signature verification failed',

@@ -8,7 +8,7 @@ import { ConflictError } from '@shared/errors';
  * Contains domain logic that doesn't naturally fit within a single aggregate
  */
 export class UserDomainService {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(private readonly userRepository: IUserRepository) { }
 
   async ensureEmailIsUnique(email: Email): Promise<void> {
     const exists = await this.userRepository.exists(email);
@@ -17,7 +17,7 @@ export class UserDomainService {
     }
   }
 
-  async canUserBecomeSeller(user: User): Promise<boolean> {
+  canUserBecomeSeller(user: User): boolean {
     // Business rule: User must have at least 5 completed orders to become seller
     const completedOrders = user.currentOrderCount - user.returnedOrderCount;
     return completedOrders >= 5;
@@ -26,14 +26,14 @@ export class UserDomainService {
   calculateUserTrustScore(user: User): number {
     const totalOrders = user.currentOrderCount;
     const returnedOrders = user.returnedOrderCount;
-    
+
     if (totalOrders === 0) {
       return 100; // New users start with full trust
     }
 
     const returnRate = returnedOrders / totalOrders;
     const trustScore = Math.max(0, 100 - returnRate * 100);
-    
+
     return Math.round(trustScore);
   }
 

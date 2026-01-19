@@ -1,14 +1,14 @@
-// import { IProductRepository } from '@domain/product/repositories/product.repository.interface'; // Removed unused import
+// import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
 import { ListProductsResponseDTO, ProductResponseDTO } from '@application/dtos/product/product.dto';
 import { AsyncResult, success } from '@shared/types/result';
 import { APP_CONSTANTS } from '@shared/constants';
+import { Product } from '@domain/product/aggregates/product.aggregate';
 
 /**
  * Use case for listing products with pagination
  */
 export class ListProductsUseCase {
-  // import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
-  constructor(private readonly productRepository: any) {}
+  constructor(private readonly productRepository: any) { }
 
   /**
    * Execute the list products use case
@@ -22,8 +22,9 @@ export class ListProductsUseCase {
     const normalizedLimit = Math.min(Math.max(1, limit), APP_CONSTANTS.MAX_PAGE_SIZE);
 
     // Get products
-    const products = await this.productRepository.findAll(normalizedSkip, normalizedLimit);
-    
+    // Assuming repository returns Product[] (Aggregates)
+    const products: Product[] = await this.productRepository.findAll(normalizedSkip, normalizedLimit);
+
     // Get total count
     const total = await this.productRepository.count();
 
@@ -32,28 +33,28 @@ export class ListProductsUseCase {
     const hasMore = normalizedSkip + products.length < total;
 
     // Map to DTOs
-    const productDTOs: ProductResponseDTO[] = products.map((product: any) => {
-      const props = (product as any).props;
+    const productDTOs: ProductResponseDTO[] = products.map((product) => {
       return {
         id: product.id,
-        pid: props.pid,
-        title: props.title,
-        category: props.category,
-        actualPrice: props.actualPrice,
-        sellingPrice: props.sellingPrice,
-        discount: props.discount,
-        brand: props.brand,
-        description: props.description,
-        outOfStock: props.outOfStock,
-        images: props.images,
-        productDetails: props.productDetails,
-        averageRating: props.averageRating,
-        sellerId: props.sellerId,
-        subCategory: props.subCategory,
-        stripeId: props.stripeId,
-        url: props.url,
-        createdAt: props.createdAt.toISOString(),
-        updatedAt: props.updatedAt.toISOString(),
+        pid: product.sku.value,
+        title: product.title,
+        category: product.category,
+        actualPrice: product.actualPrice.amount,
+        sellingPrice: product.sellingPrice.amount,
+        discount: product.discountPercentage,
+        brand: (product as any).props.brand,
+        description: product.description,
+        outOfStock: !product.isAvailable,
+        inventory: product.inventory.value,
+        images: product.images,
+        productDetails: (product as any).props.productDetails,
+        averageRating: product.averageRating,
+        sellerId: product.sellerId,
+        subCategory: (product as any).props.subCategory,
+        stripeId: product.stripeId,
+        url: product.url,
+        createdAt: product.createdAt.toISOString(),
+        updatedAt: product.updatedAt.toISOString(),
       };
     });
 

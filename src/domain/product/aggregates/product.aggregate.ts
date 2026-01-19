@@ -1,12 +1,12 @@
-import { AggregateRoot } from '@shared/domain/aggregate-root';
-import { ID, Timestamp } from '@shared/types/common';
+import { AggregateRoot } from '../../../shared/domain/aggregate-root';
+import { ID, Timestamp } from '../../../shared/types/common';
 import { Money } from '../value-objects/money.vo';
 import { SKU } from '../value-objects/sku.vo';
 import { Quantity } from '../value-objects/quantity.vo';
 import { ProductCreated } from '../events/product-created.event';
 import { ProductOutOfStock } from '../events/product-out-of-stock.event';
 import { PriceChanged } from '../events/price-changed.event';
-import { BusinessRuleError } from '@shared/errors';
+import { BusinessRuleError } from '../../../shared/errors';
 
 export interface ProductProps {
   sku: SKU;
@@ -118,9 +118,9 @@ export class Product extends AggregateRoot<ProductProps> {
   }
 
   get discountPercentage(): number {
-    if (this.props.actualPrice.amount === 0) return 0;
+    if (this.props.actualPrice.amount === 0) { return 0; }
     const discount = this.props.actualPrice.subtract(this.props.sellingPrice);
-    return Math.round((discount.amount / this.props.actualPrice.amount) * 100);
+    return parseFloat(((discount.amount / this.props.actualPrice.amount) * 100).toFixed(2));
   }
 
   get averageRating(): number {
@@ -148,8 +148,8 @@ export class Product extends AggregateRoot<ProductProps> {
   }
 
   // Business methods
-  updatePrice(newPrice: Money, changedBy: ID): void {
-    if (newPrice.isGreaterThan(this.props.actualPrice)) {
+  updatePrice(sellingPrice: Money, actualPrice: Money, changedBy: ID): void {
+    if (sellingPrice.isGreaterThan(actualPrice)) {
       throw new BusinessRuleError(
         'Selling price cannot be greater than actual price',
         'INVALID_PRICE'
@@ -157,7 +157,8 @@ export class Product extends AggregateRoot<ProductProps> {
     }
 
     const previousPrice = this.props.sellingPrice.amount;
-    this.props.sellingPrice = newPrice;
+    this.props.sellingPrice = sellingPrice;
+    this.props.actualPrice = actualPrice;
     this.props.updatedAt = new Date();
 
     this.addDomainEvent(
@@ -165,7 +166,7 @@ export class Product extends AggregateRoot<ProductProps> {
         productId: this.id,
         sku: this.props.sku.value,
         previousPrice,
-        newPrice: newPrice.amount,
+        newPrice: sellingPrice.amount,
         changedAt: new Date(),
         changedBy,
       })
@@ -210,10 +211,26 @@ export class Product extends AggregateRoot<ProductProps> {
   }
 
   updateDetails(title: string, description: string): void {
-    if (title.trim().length < 3) throw new BusinessRuleError('Title too short', 'INVALID_TITLE');
+    if (title.trim().length < 3) { throw new BusinessRuleError('Title too short', 'INVALID_TITLE'); }
     this.props.title = title;
     this.props.description = description;
     this.props.updatedAt = new Date();
+  }
+
+  addImage(imageUrl: string): void {
+    if (!this.props.images.includes(imageUrl)) {
+      this.props.images.push(imageUrl);
+      this.props.updatedAt = new Date();
+    }
+  }
+
+  removeImage(imageUrl: string): void {
+    this.props.images = this.props.images.filter(img => img !== imageUrl);
+    this.props.updatedAt = new Date();
+  }
+
+  hasAvailableQuantity(quantity: Quantity): boolean {
+    return this.props.inventory.value >= quantity.value;
   }
 
   deactivate(): void {

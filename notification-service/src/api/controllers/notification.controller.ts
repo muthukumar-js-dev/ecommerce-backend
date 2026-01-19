@@ -12,7 +12,7 @@ export class NotificationController {
     /**
      * Health check endpoint
      */
-    health = async (req: Request, res: Response): Promise<void> => {
+    health = (req: Request, res: Response): void => {
         res.json({
             status: 'healthy',
             service: 'notification-service',

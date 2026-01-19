@@ -1,5 +1,5 @@
-import { ValueObject } from '@shared/domain/value-object';
-import { ValidationError } from '@shared/errors';
+import { ValueObject } from '../../../shared/domain/value-object';
+import { ValidationError } from '../../../shared/errors';
 import { Currency } from '@shared/types/common';
 
 interface MoneyProps {
@@ -52,7 +52,7 @@ export class Money extends ValueObject<MoneyProps> {
 
   multiply(factor: number): Money {
     if (factor < 0) {
-        throw new ValidationError('Invalid factor', [{ field: 'factor', message: 'Factor cannot be negative' }]);
+      throw new ValidationError('Invalid factor', [{ field: 'factor', message: 'Factor cannot be negative' }]);
     }
     return Money.create(this.amount * factor, this.currency);
   }
@@ -66,9 +66,9 @@ export class Money extends ValueObject<MoneyProps> {
     this.ensureSameCurrency(other);
     return this.amount < other.amount;
   }
-  
+
   equals(other: Money): boolean {
-      return this.amount === other.amount && this.currency === other.currency;
+    return this.amount === other.amount && this.currency === other.currency;
   }
 
   private ensureSameCurrency(other: Money): void {
@@ -88,8 +88,8 @@ export class Money extends ValueObject<MoneyProps> {
     };
     return symbols[this.currency] || this.currency;
   }
-  
+
   toString(): string {
-      return this.formatted;
+    return this.formatted;
   }
 }

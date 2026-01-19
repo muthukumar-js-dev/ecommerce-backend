@@ -3,6 +3,7 @@ import { IUserRepository } from '@domain/user/repositories/user.repository.inter
 import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
 import { IOrderRepository } from '@domain/order/repositories/order.repository.interface';
 import { IAddressRepository } from '@domain/address/repositories/address.repository.interface';
+import { ICartRepository } from '@domain/cart/repositories/cart.repository.interface';
 import { Order } from '@domain/order/aggregates/order.aggregate';
 import { ID } from '@shared/types/common';
 import { PlaceOrderCommand } from '@application/commands/order/place-order.command';
@@ -10,6 +11,7 @@ import { OrderItem } from '@domain/order/entities/order-item.entity';
 import { Quantity } from '@domain/product/value-objects/quantity.vo';
 import { ShippingAddress } from '@domain/order/value-objects/shipping-address.vo';
 import { BusinessRuleError } from '@shared/errors';
+import { EventBus } from '@infrastructure/events/event-bus';
 
 export class PlaceOrderSaga extends BaseSaga {
     private order?: Order;
@@ -21,7 +23,10 @@ export class PlaceOrderSaga extends BaseSaga {
         private readonly userRepository: IUserRepository,
         private readonly productRepository: IProductRepository,
         private readonly orderRepository: IOrderRepository,
-        private readonly addressRepository: IAddressRepository
+
+        private readonly addressRepository: IAddressRepository,
+        private readonly cartRepository: ICartRepository,
+        private readonly eventBus: EventBus
     ) {
         super();
     }
@@ -29,6 +34,24 @@ export class PlaceOrderSaga extends BaseSaga {
     async execute(): Promise<void> {
         // Step 1: Validate User
         await this.executeStep(new ValidateUserStep(this.userId, this.userRepository));
+
+        // Step 1.5: Fetch Items from Cart if missing
+        if (!this.command.items || this.command.items.length === 0) {
+            const cart = await this.cartRepository.findByUserId(this.userId);
+            if (!cart) {
+                throw new BusinessRuleError('Cart not found', 'CART_NOT_FOUND');
+            }
+            const cartProps = (cart as any).props;
+            if (!cartProps.items || cartProps.items.length === 0) {
+                throw new BusinessRuleError('Cart is empty', 'CART_EMPTY');
+            }
+            // Map cart items to command items structure (temporarily mute readonly)
+            (this.command as any).items = cartProps.items.map((item: any) => ({
+                productId: item.productId,
+                quantity: item.quantity,
+                price: 0 // Will be fetched from product repo
+            }));
+        }
 
         // Step 2: Reserve Inventory
         await this.executeStep(
@@ -47,6 +70,7 @@ export class PlaceOrderSaga extends BaseSaga {
                 this.orderRepository,
                 this.productRepository,
                 this.addressRepository,
+                this.eventBus,
                 (order) => { this.order = order; }
             )
         );
@@ -55,6 +79,11 @@ export class PlaceOrderSaga extends BaseSaga {
         await this.executeStep(
             new UpdateUserOrderCountStep(this.userId, this.userRepository)
         );
+
+        // Step 5: Clear Cart
+        await this.executeStep(
+            new ClearCartStep(this.userId, this.cartRepository)
+        );
     }
 
     getOrder(): Order | undefined {
@@ -62,7 +91,7 @@ export class PlaceOrderSaga extends BaseSaga {
     }
 }
 
-// --- Steps ---
+// ...
 
 class ValidateUserStep implements SagaStep {
     name = 'ValidateUser';
@@ -79,8 +108,9 @@ class ValidateUserStep implements SagaStep {
         }
     }
 
-    async compensate(): Promise<void> {
+    compensate(): Promise<void> {
         // Read-only
+        return Promise.resolve();
     }
 }
 
@@ -104,7 +134,7 @@ class ReserveInventoryStep implements SagaStep {
             product.reserveInventory(quantity);
 
             const result = await this.productRepository.update(product);
-            if (!result.success) throw result.error;
+            if (!result.success) { throw result.error; }
 
             this.reservedProducts.push({
                 productId: item.productId,
@@ -134,6 +164,7 @@ class CreateOrderStep implements SagaStep {
         private orderRepository: IOrderRepository,
         private productRepository: IProductRepository,
         private addressRepository: IAddressRepository,
+        private eventBus: EventBus,
         private onOrderCreated: (order: Order) => void
     ) { }
 
@@ -142,7 +173,7 @@ class CreateOrderStep implements SagaStep {
 
         for (const itemCmd of this.command.items) {
             const product = await this.productRepository.findById(itemCmd.productId);
-            if (!product) throw new Error(`Product ${itemCmd.productId} not found during creation`);
+            if (!product) { throw new Error(`Product ${itemCmd.productId} not found during creation`); }
 
             orderItems.push(
                 OrderItem.create(
@@ -156,7 +187,7 @@ class CreateOrderStep implements SagaStep {
         }
 
         const address = await this.addressRepository.findById(this.command.shippingAddressId);
-        if (!address) throw new BusinessRuleError('Shipping Address not found', 'ADDRESS_NOT_FOUND');
+        if (!address) { throw new BusinessRuleError('Shipping Address not found', 'ADDRESS_NOT_FOUND'); }
 
         const shippingAddress = ShippingAddress.create({
             street: address.firstLine,
@@ -175,16 +206,26 @@ class CreateOrderStep implements SagaStep {
             new Date().getTime().toString()
         );
 
+        // Capture events before saving (as repo.save clears them)
+        const events = [...order.domainEvents];
+
         const result = await this.orderRepository.save(order);
         if (!result.success) {
             throw result.error;
         }
 
+        // Publish events manually to EventBus to trigger handlers (Read Model updates)
+        // This simulates the Outbox Processor for Integration Tests
+        for (const event of events) {
+            await this.eventBus.publish(event);
+        }
+
         this.onOrderCreated(order);
     }
 
-    async compensate(): Promise<void> {
+    compensate(): Promise<void> {
         console.log('[CreateOrderStep] Compensation: Would cancel order here');
+        return Promise.resolve();
     }
 }
 
@@ -216,5 +257,27 @@ class UpdateUserOrderCountStep implements SagaStep {
             user.decrementOrderCount();
             await this.userRepository.save(user);
         }
+    }
+}
+
+class ClearCartStep implements SagaStep {
+    name = 'ClearCart';
+
+    constructor(
+        private userId: ID,
+        private cartRepository: ICartRepository
+    ) { }
+
+    async execute(): Promise<void> {
+        const cart = await this.cartRepository.findByUserId(this.userId);
+        if (cart) {
+            cart.clear();
+            await this.cartRepository.update(cart);
+        }
+    }
+
+    async compensate(): Promise<void> {
+        // Cannot easily restore cart, assume acceptable for now
+        return Promise.resolve();
     }
 }

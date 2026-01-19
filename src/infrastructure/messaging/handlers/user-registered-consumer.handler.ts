@@ -26,14 +26,15 @@ export class UserRegisteredConsumerHandler extends BaseEventHandler {
 
         // Update user read model
         await this.userReadRepo.create({
-            userId: event.userId,
-            email: event.email,
+            id: event.userId,
             name: event.name,
+            email: event.email,
             role: event.role,
-            isActive: true,
+            currentOrderCount: 0,
+            returnedOrderCount: 0,
             createdAt: new Date(event.createdAt),
             updatedAt: new Date(),
-        });
+        } as any);
 
         console.log(`  ✓ User read model created for: ${event.email}`);
     }

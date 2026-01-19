@@ -35,7 +35,7 @@ export class EventBus {
 
     // 2. Dispatch to handlers
     const handlers = this.handlers.get(event.eventName);
-    if (!handlers) return;
+    if (!handlers) { return; }
 
     // Use map + Promise.allSettled (or manual try/catch) to isolate handler failures
     const promises = handlers.map(async (handler) => {

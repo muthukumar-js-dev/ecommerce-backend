@@ -29,12 +29,16 @@ export class ProductReadRepository {
 
     async save(data: Partial<IProductReadModel>): Promise<void> {
         const id = data.id || data._id;
-        if (!id) throw new Error('Cannot save ReadModel without ID');
+        if (!id) { throw new Error('Cannot save ReadModel without ID'); }
 
         await ProductReadModel.findByIdAndUpdate(
             id,
             { ...data, _id: id },
             { upsert: true, new: true }
         ).exec();
+    }
+
+    async create(data: IProductReadModel): Promise<void> {
+        return this.save(data);
     }
 }

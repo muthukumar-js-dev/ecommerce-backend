@@ -11,7 +11,7 @@ import { randomUUID } from 'crypto';
  * Use case for creating a new address
  */
 export class CreateAddressUseCase {
-  constructor(private readonly addressRepository: IAddressRepository) {}
+  constructor(private readonly addressRepository: IAddressRepository) { }
 
   async execute(userId: ID, dto: AddressRequestDTO): AsyncResult<AddressResponseDTO> {
     // Validate input
@@ -90,8 +90,8 @@ export class CreateAddressUseCase {
       name: props.name,
       mobileNumber: props.mobileNumber,
       pincode: props.pincode,
-      locality: props.locality,
-      address: props.address,
+      locality: props.secondLine,
+      address: props.firstLine,
       city: props.city,
       state: props.state,
       landmark: props.landmark,

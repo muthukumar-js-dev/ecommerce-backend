@@ -15,7 +15,7 @@ export class KafkaConsumer {
     private handlers = new Map<KafkaTopic, MessageHandler>();
 
     constructor(
-        private kafka: Kafka,
+        kafka: Kafka,
         private groupId: string
     ) {
         const config: ConsumerConfig = {

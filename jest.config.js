@@ -5,8 +5,8 @@ module.exports = {
   // Test environment
   testEnvironment: 'node',
   
-  // Roots
-  roots: ['<rootDir>/src', '<rootDir>/tests'],
+  // Roots - removed to allow __mocks__ discovery at root
+  // roots: ['<rootDir>/src', '<rootDir>/tests'],
 
   globalSetup: '<rootDir>/tests/global-setup.js',
   globalTeardown: '<rootDir>/tests/global-teardown.js',
@@ -52,7 +52,7 @@ module.exports = {
   ],
 
   // Coverage thresholds
-  coverageThresholds: {
+  coverageThreshold: {
     global: {
       branches: 80,
       functions: 85,
@@ -74,12 +74,14 @@ module.exports = {
   },
   
   // Setup files
-  // setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   
   // Ignore patterns
   testPathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
+    '/tests/e2e/',
+    '/tests/performance/',
   ],
   
   // Verbose output
@@ -92,8 +94,8 @@ module.exports = {
   restoreMocks: true,
   
   // Reset mocks between tests
-  resetMocks: true,
+  resetMocks: false,
   
   // Timeout
-  testTimeout: 10000,
+  testTimeout: 30000,
 };

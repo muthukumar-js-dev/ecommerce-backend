@@ -1,0 +1,132 @@
+# Prometheus Alert Rules
+
+groups:
+  - name: application_alerts
+    interval: 30s
+    rules:
+      # High Error Rate
+      - alert: HighErrorRate
+        expr: (sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))) * 100 > 1
+        for: 5m
+        labels:
+          severity: critical
+          component: application
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }}% (threshold: 1%)"
+      
+      # Slow Response Time
+      - alert: SlowResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          component: application
+        annotations:
+          summary: "Slow response time detected"
+          description: "P95 response time is {{ $value }}s (threshold: 0.5s)"
+      
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: avg(rate(container_cpu_usage_seconds_total{namespace="ecommerce-prod"}[5m])) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% (threshold: 85%)"
+      
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: (sum(container_memory_usage_bytes{namespace="ecommerce-prod"}) / sum(container_spec_memory_limit_bytes{namespace="ecommerce-prod"})) * 100 > 90
+        for: 10m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }}% (threshold: 90%)"
+      
+      # Pod Crashes
+      - alert: PodCrashLooping
+        expr: rate(kube_pod_container_status_restarts_total{namespace="ecommerce-prod"}[15m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "Pod is crash looping"
+          description: "Pod {{ $labels.pod }} is restarting"
+
+  - name: database_alerts
+    interval: 30s
+    rules:
+      # Slow Database Queries
+      - alert: SlowDatabaseQueries
+        expr: histogram_quantile(0.95, rate(mongodb_query_duration_seconds_bucket[5m])) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Slow database queries"
+          description: "P95 query time is {{ $value }}s (threshold: 0.1s)"
+      
+      # High Database Connections
+      - alert: HighDatabaseConnections
+        expr: mongodb_connections{state="current"} / mongodb_connections{state="available"} > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High database connection usage"
+          description: "Connection pool is {{ $value | humanizePercentage }} full"
+      
+      # Low Cache Hit Rate
+      - alert: LowCacheHitRate
+        expr: (redis_keyspace_hits_total / (redis_keyspace_hits_total + redis_keyspace_misses_total)) * 100 < 70
+        for: 15m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Low cache hit rate"
+          description: "Cache hit rate is {{ $value }}% (threshold: 70%)"
+      
+      # Redis Memory High
+      - alert: RedisMemoryHigh
+        expr: (redis_memory_used_bytes / redis_memory_max_bytes) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Redis memory usage high"
+          description: "Redis memory is {{ $value }}% full (threshold: 85%)"
+
+  - name: business_alerts
+    interval: 1m
+    rules:
+      # Low Order Rate
+      - alert: LowOrderRate
+        expr: rate(orders_created_total[5m]) < 1
+        for: 30m
+        labels:
+          severity: warning
+          component: business
+        annotations:
+          summary: "Low order rate"
+          description: "Order rate is {{ $value }}/sec (expected: >1/sec)"
+      
+      # Payment Failures
+      - alert: HighPaymentFailureRate
+        expr: (sum(rate(payment_failed_total[5m])) / sum(rate(payment_attempted_total[5m]))) * 100 > 5
+        for: 10m
+        labels:
+          severity: critical
+          component: business
+        annotations:
+          summary: "High payment failure rate"
+          description: "Payment failure rate is {{ $value }}% (threshold: 5%)"

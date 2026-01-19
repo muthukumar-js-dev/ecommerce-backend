@@ -1,5 +1,4 @@
 import { Money } from '@domain/product/value-objects/money.vo';
-import { ID } from '@shared/types/common';
 import { AsyncResult } from '@shared/types/result';
 
 export interface PaymentIntent {

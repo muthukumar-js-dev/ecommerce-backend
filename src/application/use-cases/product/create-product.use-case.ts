@@ -1,5 +1,8 @@
-// import { IProductRepository } from '@domain/product/repositories/product.repository.interface'; // Removed unused import
-import { Product } from '@domain/product/entities/product.entity';
+// import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
+import { Product } from '@domain/product/aggregates/product.aggregate';
+import { SKU } from '@domain/product/value-objects/sku.vo';
+import { Money } from '@domain/product/value-objects/money.vo';
+import { Quantity } from '@domain/product/value-objects/quantity.vo';
 import {
   CreateProductRequestDTO,
   ProductResponseDTO,
@@ -13,8 +16,7 @@ import { randomUUID } from 'crypto';
  * Use case for creating a new product
  */
 export class CreateProductUseCase {
-  // import { IProductRepository } from '@domain/product/repositories/product.repository.interface'; // Commented out to fix build
-  constructor(private readonly productRepository: any) {}
+  constructor(private readonly productRepository: any) { }
 
   /**
    * Execute the create product use case
@@ -32,30 +34,25 @@ export class CreateProductUseCase {
       return failure(new ConflictError(`Product with PID '${dto.pid}' already exists`));
     }
 
-    // Calculate discount
-    const discount = dto.actualPrice > 0 
-      ? Math.round(((dto.actualPrice - dto.sellingPrice) / dto.actualPrice) * 100)
-      : 0;
+    // Create product aggregate
+    const initialInventory = dto.inventory !== undefined ? dto.inventory : 100;
 
-    // Create product entity
     const product = Product.create(
       {
-        pid: dto.pid,
+        sku: SKU.create(dto.pid),
         title: dto.title,
         category: dto.category,
-        actualPrice: dto.actualPrice,
-        sellingPrice: dto.sellingPrice,
+        actualPrice: Money.create(dto.actualPrice),
+        sellingPrice: Money.create(dto.sellingPrice),
         brand: dto.brand,
         description: dto.description,
-        averageRating: 0,
-        discount,
-        outOfStock: false,
         images: dto.images,
-        productDetails: dto.productDetails,
+        productDetails: dto.productDetails.map(d => ({ key: d.key, value: d.value })),
         sellerId: dto.sellerId,
         subCategory: dto.subCategory,
         stripeId: dto.stripeId,
         url: dto.url,
+        inventory: Quantity.create(initialInventory),
       },
       randomUUID()
     );
@@ -146,30 +143,30 @@ export class CreateProductUseCase {
   }
 
   /**
-   * Map Product entity to DTO
+   * Map Product aggregate to DTO
    */
   private toDTO(product: Product): ProductResponseDTO {
-    const props = (product as any).props;
     return {
       id: product.id,
-      pid: props.pid,
-      title: props.title,
-      category: props.category,
-      actualPrice: props.actualPrice,
-      sellingPrice: props.sellingPrice,
-      discount: props.discount,
-      brand: props.brand,
-      description: props.description,
-      outOfStock: props.outOfStock,
-      images: props.images,
-      productDetails: props.productDetails,
-      averageRating: props.averageRating,
-      sellerId: props.sellerId,
-      subCategory: props.subCategory,
-      stripeId: props.stripeId,
-      url: props.url,
-      createdAt: props.createdAt.toISOString(),
-      updatedAt: props.updatedAt.toISOString(),
+      pid: product.sku.value,
+      title: product.title,
+      category: product.category,
+      actualPrice: product.actualPrice.amount,
+      sellingPrice: product.sellingPrice.amount,
+      discount: product.discountPercentage,
+      brand: (product as any).props.brand,
+      description: product.description,
+      outOfStock: !product.isAvailable,
+      inventory: product.inventory.value,
+      images: product.images,
+      productDetails: (product as any).props.productDetails,
+      averageRating: product.averageRating,
+      sellerId: product.sellerId,
+      subCategory: (product as any).props.subCategory,
+      stripeId: product.stripeId,
+      url: product.url,
+      createdAt: product.createdAt.toISOString(),
+      updatedAt: product.updatedAt.toISOString(),
     };
   }
 }

@@ -31,22 +31,30 @@ describe('CQRS Integration: Register User', () => {
 
         const commandResult = await cqrsModule.commandBus.execute(command);
 
+        if (!commandResult.success) {
+            console.error('Register User Failed:', commandResult.error);
+        }
         expect(commandResult.success).toBe(true);
-        if (!commandResult.success) throw new Error(commandResult.error.message);
 
-        const { userId } = commandResult.value as any;
+        const { userId } = (commandResult as any).data as any;
         expect(userId).toBeDefined();
 
         // 2. Query (Read Model)
         // The EventBus implementation is synchronous (await Promise.all), so the Read Model 
         // should be updated before this line executes.
+        // Wait for eventual consistency
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
         const query = new GetUserProfileQuery(userId);
         const queryResult = await cqrsModule.queryBus.execute(query);
 
+        if (!queryResult.success) {
+            console.error('Query Failed:', queryResult.error);
+            throw new Error(queryResult.error.message);
+        }
         expect(queryResult.success).toBe(true);
-        if (!queryResult.success) throw new Error(queryResult.error.message);
 
-        const profile = queryResult.value as any;
+        const profile = queryResult.data as any;
         expect(profile).toEqual(expect.objectContaining({
             id: userId,
             name: 'CQRS User',

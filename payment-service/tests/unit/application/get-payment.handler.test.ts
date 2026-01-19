@@ -1,9 +1,9 @@
-import { GetPaymentHandler } from '../../../application/queries/get-payment.handler';
-import { GetPaymentQuery } from '../../../application/queries/get-payment.query';
-import { IPaymentRepository } from '../../../domain/repositories/payment.repository.interface';
-import { Payment, PaymentStatus } from '../../../domain/payment.aggregate';
-import { Money } from '../../../../../src/domain/product/value-objects/money.vo';
-import { NotFoundError } from '../../../../../src/shared/errors';
+import { GetPaymentHandler } from '../../../src/application/queries/get-payment.handler';
+import { GetPaymentQuery } from '../../../src/application/queries/get-payment.query';
+import { IPaymentRepository } from '../../../src/domain/repositories/payment.repository.interface';
+import { Payment, PaymentStatus } from '../../../src/domain/payment.aggregate';
+import { Money } from '../../../../src/domain/product/value-objects/money.vo';
+import { NotFoundError } from '../../../../src/shared/errors';
 
 describe('GetPaymentHandler', () => {
     let handler: GetPaymentHandler;

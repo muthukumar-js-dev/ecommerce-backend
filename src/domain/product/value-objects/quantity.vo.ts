@@ -1,5 +1,5 @@
-import { ValueObject } from '@shared/domain/value-object';
-import { ValidationError } from '@shared/errors';
+import { ValueObject } from '../../../shared/domain/value-object';
+import { ValidationError } from '../../../shared/errors';
 
 interface QuantityProps {
   value: number;
@@ -42,6 +42,10 @@ export class Quantity extends ValueObject<QuantityProps> {
     return this.value > 0;
   }
 
+  isSufficient(required: Quantity): boolean {
+    return this.value >= required.value;
+  }
+
   add(other: Quantity): Quantity {
     return Quantity.create(this.value + other.value);
   }
@@ -52,7 +56,7 @@ export class Quantity extends ValueObject<QuantityProps> {
     // Usually business logic checks isGreaterThan before subtracting.
     // But Quantity type itself should ensure it doesn't become negative.
     if (other.value > this.value) {
-         throw new ValidationError('Insufficient quantity', [{field: 'quantity', message: 'Resulting quantity cannot be negative'}]);
+      throw new ValidationError('Insufficient quantity', [{ field: 'quantity', message: 'Resulting quantity cannot be negative' }]);
     }
     return Quantity.create(this.value - other.value);
   }
@@ -60,12 +64,12 @@ export class Quantity extends ValueObject<QuantityProps> {
   isGreaterThan(other: Quantity): boolean {
     return this.value > other.value;
   }
-  
+
   isLessThan(other: Quantity): boolean {
     return this.value < other.value;
   }
-  
+
   toString(): string {
-      return this.value.toString();
+    return this.value.toString();
   }
 }

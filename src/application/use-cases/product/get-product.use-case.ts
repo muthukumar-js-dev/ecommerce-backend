@@ -1,48 +1,49 @@
-// import { IProductRepository } from '@domain/product/repositories/product.repository.interface'; // Removed unused import
+// import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
 import { ProductResponseDTO } from '@application/dtos/product/product.dto';
 import { AsyncResult, success, failure } from '@shared/types/result';
 import { NotFoundError } from '@shared/errors';
 import { ID } from '@shared/types/common';
+import { Product } from '@domain/product/aggregates/product.aggregate';
 
 /**
  * Use case for getting a product by ID
  */
 export class GetProductUseCase {
-  // import { IProductRepository } from '@domain/product/repositories/product.repository.interface';
-  constructor(private readonly productRepository: any) {}
+  constructor(private readonly productRepository: any) { }
 
   /**
    * Execute the get product use case
    */
   async execute(productId: ID): AsyncResult<ProductResponseDTO> {
     // Find product
-    const product = await this.productRepository.findById(productId);
+    const product: Product | null = await this.productRepository.findById(productId);
+
     if (!product) {
       return failure(new NotFoundError('Product', productId));
     }
 
     // Map to DTO
-    const props = (product as any).props;
     return success({
       id: product.id,
-      pid: props.pid,
-      title: props.title,
-      category: props.category,
-      actualPrice: props.actualPrice,
-      sellingPrice: props.sellingPrice,
-      discount: props.discount,
-      brand: props.brand,
-      description: props.description,
-      outOfStock: props.outOfStock,
-      images: props.images,
-      productDetails: props.productDetails,
-      averageRating: props.averageRating,
-      sellerId: props.sellerId,
-      subCategory: props.subCategory,
-      stripeId: props.stripeId,
-      url: props.url,
-      createdAt: props.createdAt.toISOString(),
-      updatedAt: props.updatedAt.toISOString(),
+      pid: product.sku.value,
+      title: product.title,
+      category: product.category,
+      actualPrice: product.actualPrice.amount,
+      sellingPrice: product.sellingPrice.amount,
+      discount: product.discountPercentage,
+      brand: (product as any).props.brand,
+      description: product.description,
+      inventory: product.inventory.value,
+      outOfStock: !product.isAvailable,
+      images: product.images,
+      productDetails: (product as any).props.productDetails,
+      averageRating: product.averageRating,
+      sellerId: product.sellerId,
+      subCategory: (product as any).props.subCategory,
+      stripeId: product.stripeId,
+      url: product.url,
+      createdAt: product.createdAt.toISOString(),
+      updatedAt: product.updatedAt.toISOString(),
     });
   }
 }

@@ -1,11 +1,11 @@
-import { Email } from '../../../value-objects/email.vo';
+import { Email } from '../../value-objects/email.vo';
 import { ValidationError } from '@shared/errors';
 
 describe('Email Value Object', () => {
   it('should create a valid email', () => {
     const emailStr = 'test@example.com';
     const email = Email.create(emailStr);
-    
+
     expect(email.value).toBe(emailStr);
     expect(email.domain).toBe('example.com');
     expect(email.localPart).toBe('test');

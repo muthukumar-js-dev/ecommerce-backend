@@ -1,13 +1,13 @@
 import request from 'supertest';
 import express from 'express';
-import { PaymentController } from '../../../api/controllers/payment.controller';
-import { createPaymentRoutes } from '../../../api/routes/payment.routes';
-import { InitiatePaymentHandler } from '../../../application/commands/initiate-payment.handler';
-import { CapturePaymentHandler } from '../../../application/commands/capture-payment.handler';
-import { RefundPaymentHandler } from '../../../application/commands/refund-payment.handler';
-import { GetPaymentHandler } from '../../../application/queries/get-payment.handler';
-import { success, failure } from '../../../../src/shared/types/result';
-import { NotFoundError } from '../../../../src/shared/errors';
+import { PaymentController } from '../../src/api/controllers/payment.controller';
+import { createPaymentRoutes } from '../../src/api/routes/payment.routes';
+import { InitiatePaymentHandler } from '../../src/application/commands/initiate-payment.handler';
+import { CapturePaymentHandler } from '../../src/application/commands/capture-payment.handler';
+import { RefundPaymentHandler } from '../../src/application/commands/refund-payment.handler';
+import { GetPaymentHandler } from '../../src/application/queries/get-payment.handler';
+import { success, failure } from '../../../src/shared/types/result';
+import { NotFoundError } from '../../../src/shared/errors';
 
 describe('Payment API E2E Tests', () => {
     let app: express.Application;

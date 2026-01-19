@@ -1,4 +1,4 @@
-import { CommandHandler } from '../../command-handler.interface';
+import { CommandHandler } from '../command-handler.interface';
 import { PlaceOrderCommand } from './place-order.command';
 import { AsyncResult } from '@shared/types/result';
 import { EventBus } from '@infrastructure/events/event-bus';
@@ -10,10 +10,12 @@ import { CommandBus } from '../command-bus';
 import { QueryBus } from '../../queries/query-bus';
 import { ID } from '@shared/types/common';
 import { AddressRepository } from '@infrastructure/database/mongodb/repositories/address.repository';
+import { CartRepository } from '@infrastructure/database/mongodb/repositories/cart.repository';
 
 // Result interface
 export interface PlaceOrderResult {
-  orderId: ID;
+  id: ID;
+  orderNumber: string;
 }
 
 export class PlaceOrderHandler implements CommandHandler<PlaceOrderCommand, PlaceOrderResult> {
@@ -35,7 +37,8 @@ export class PlaceOrderHandler implements CommandHandler<PlaceOrderCommand, Plac
       userRepository,
       productRepository,
       orderRepository,
-      addressRepository
+      addressRepository,
+      new CartRepository()
     );
   }
 
@@ -46,9 +49,9 @@ export class PlaceOrderHandler implements CommandHandler<PlaceOrderCommand, Plac
 
     // Return directly as it matches locally.
     // If mismatched, mapping needed. 
-    // OrderApplicationService returns AsyncResult<{ orderId: ID }>
-    // PlaceOrderResult is { orderId: ID }
+    // OrderApplicationService now returns AsyncResult<{ id: ID; orderNumber: string }>
+    // PlaceOrderResult is { id: ID; orderNumber: string }
     // Compatible.
-    return result as AsyncResult<PlaceOrderResult>;
+    return result;
   }
 }

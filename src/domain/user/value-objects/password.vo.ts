@@ -1,5 +1,5 @@
-import { ValueObject } from '@shared/domain/value-object';
-import { ValidationError } from '@shared/errors';
+import { ValueObject } from '../../../shared/domain/value-object';
+import { ValidationError } from '../../../shared/errors';
 import bcrypt from 'bcrypt';
 
 interface PasswordProps {

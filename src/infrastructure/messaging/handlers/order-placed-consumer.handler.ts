@@ -43,13 +43,18 @@ export class OrderPlacedConsumerHandler extends BaseEventHandler {
             orderId: event.orderId,
             orderNumber: event.orderNumber,
             userId: event.userId,
-            items: event.items,
+            items: event.items.map(item => ({
+                productId: item.productId,
+                name: item.productName,
+                quantity: item.quantity,
+                price: item.price
+            })),
+            itemCount: event.items.length,
             totalAmount: event.totalAmount,
             status: event.status,
-            shippingAddress: event.shippingAddress,
-            createdAt: new Date(event.createdAt),
+            placedAt: new Date(event.createdAt),
             updatedAt: new Date(),
-        });
+        } as any); // Cast as any because shippingAddress is in payload but maybe not in IOrderReadModel strictly or simplified
 
         console.log(`  ✓ Order read model created for: ${event.orderNumber}`);
     }

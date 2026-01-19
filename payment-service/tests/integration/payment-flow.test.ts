@@ -1,10 +1,10 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
-import { PaymentRepository } from '../../../src/infrastructure/database/repositories/payment.repository';
-import { PaymentModel } from '../../../src/infrastructure/database/schemas/payment.schema';
-import { Payment, PaymentStatus } from '../../../src/domain/payment.aggregate';
-import { Money } from '../../../../src/domain/product/value-objects/money.vo';
-import { OutboxRepository } from '../../../../src/infrastructure/database/mongodb/repositories/outbox.repository';
+import { PaymentRepository } from '../../src/infrastructure/database/repositories/payment.repository';
+import { PaymentModel } from '../../src/infrastructure/database/schemas/payment.schema';
+import { Payment, PaymentStatus } from '../../src/domain/payment.aggregate';
+import { Money } from '../../../src/domain/product/value-objects/money.vo';
+import { OutboxRepository } from '../../../src/infrastructure/database/mongodb/repositories/outbox.repository';
 
 describe('Payment Flow Integration Test', () => {
     let mongoServer: MongoMemoryServer;

@@ -7,7 +7,7 @@ import { ID } from '@shared/types/common';
  * Use case for removing item from cart
  */
 export class RemoveFromCartUseCase {
-  constructor(private readonly cartRepository: ICartRepository) {}
+  constructor(private readonly cartRepository: ICartRepository) { }
 
   /**
    * Execute the remove from cart use case
@@ -23,7 +23,7 @@ export class RemoveFromCartUseCase {
     cart.removeItem(productId);
 
     // Save cart
-    const saveResult = await this.cartRepository.save(cart);
+    const saveResult = await this.cartRepository.update(cart);
     if (!saveResult.success) {
       return failure(saveResult.error);
     }

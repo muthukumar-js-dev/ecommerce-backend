@@ -3,7 +3,7 @@ import { IPaymentRepository } from '../../domain/repositories/payment.repository
 import { IPaymentGateway } from '@shared/application/ports/payment-gateway.port';
 import { AsyncResult, success, failure } from '@shared/types/result';
 import { NotFoundError } from '@shared/errors';
-import { PaymentStatus } from '../../domain/payment.aggregate';
+
 
 /**
  * Handler for CapturePaymentCommand

@@ -15,7 +15,7 @@ jest.mock('@aws-sdk/s3-request-presigner', () => ({
     getSignedUrl: jest.fn(),
 }));
 
-import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 describe('S3Adapter', () => {
@@ -37,10 +37,10 @@ describe('S3Adapter', () => {
 
             expect(isSuccess(result)).toBe(true);
             if (isSuccess(result)) {
-                expect(result.value.url).toContain('test-bucket.s3.amazonaws.com');
-                expect(result.value.key).toContain('uploads/');
-                expect(result.value.key).toContain('.txt');
-                expect(result.value.size).toBe(fileBuffer.length);
+                expect(result.data.url).toContain('test-bucket.s3.amazonaws.com');
+                expect(result.data.key).toContain('uploads/');
+                expect(result.data.key).toContain('.txt');
+                expect(result.data.size).toBe(fileBuffer.length);
             }
 
             expect(mockS3Client.send).toHaveBeenCalledTimes(1);
@@ -72,7 +72,7 @@ describe('S3Adapter', () => {
 
             expect(isSuccess(result1) && isSuccess(result2)).toBe(true);
             if (isSuccess(result1) && isSuccess(result2)) {
-                expect(result1.value.key).not.toBe(result2.value.key);
+                expect(result1.data.key).not.toBe(result2.data.key);
             }
         });
     });
@@ -108,7 +108,7 @@ describe('S3Adapter', () => {
 
             expect(isSuccess(result)).toBe(true);
             if (isSuccess(result)) {
-                expect(result.value).toBe('https://signed-url.com');
+                expect(result.data).toBe('https://signed-url.com');
             }
 
             expect(getSignedUrl).toHaveBeenCalledWith(

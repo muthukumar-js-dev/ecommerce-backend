@@ -18,7 +18,7 @@ export class UpdateUserRoleHandler implements CommandHandler<UpdateUserRoleComma
         user.changeRole(command.role, command.changedBy);
 
         const result = await this.userRepository.save(user);
-        if (!result.success) return failure(result.error);
+        if (!result.success) {return failure(result.error);}
 
         return success(undefined);
     }

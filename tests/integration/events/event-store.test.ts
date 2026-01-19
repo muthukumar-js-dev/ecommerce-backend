@@ -36,8 +36,8 @@ describe('MongoDBEventStore Integration', () => {
 
         const retrieved = await eventStore.getByEventName('TestEvent');
         expect(retrieved).toHaveLength(1);
-        expect(retrieved[0].eventId).toBe(event.eventId);
-        expect(retrieved[0].payload).toEqual(event.payload);
+        expect(retrieved[0]!.eventId).toBe(event.eventId);
+        expect(retrieved[0]!.payload).toEqual(event.payload);
     });
 
     it('should retrieve events by aggregateId', async () => {
@@ -49,6 +49,6 @@ describe('MongoDBEventStore Integration', () => {
 
         const retrieved = await eventStore.getByAggregateId('user-123');
         expect(retrieved).toHaveLength(1);
-        expect(retrieved[0].eventId).toBe(event.eventId);
+        expect(retrieved[0]!.eventId).toBe(event.eventId);
     });
 });

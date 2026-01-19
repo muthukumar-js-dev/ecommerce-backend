@@ -13,7 +13,7 @@ import {
   ProductResponseDTO,
   ListProductsResponseDTO,
 } from '../dtos/product/product.dto';
-import { AsyncResult } from '@shared/types/result';
+import { AsyncResult, Result } from '@shared/types/result';
 import { ID } from '@shared/types/common';
 import { LogExecution } from '../decorators/logging.decorator';
 
@@ -36,7 +36,7 @@ export class ProductService extends BaseApplicationService {
       dto.brand,
       dto.sellingPrice,
       dto.actualPrice,
-      0, // Default inventory to 0 as DTO doesn't provide it
+      dto.inventory || 0,
       dto.images,
       dto.productDetails,
       dto.sellerId
@@ -59,7 +59,7 @@ export class ProductService extends BaseApplicationService {
   @LogExecution()
   async getProduct(productId: ID): AsyncResult<ProductResponseDTO> {
     const query = new GetProductQuery(productId);
-    return this.executeQuery<AsyncResult<ProductResponseDTO>>(query);
+    return this.executeQuery<Result<ProductResponseDTO>>(query);
   }
 
   @LogExecution()

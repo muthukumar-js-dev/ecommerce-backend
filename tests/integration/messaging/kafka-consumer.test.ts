@@ -4,8 +4,10 @@ import { KafkaTopic } from '../../../src/infrastructure/messaging/kafka/topics';
 import { ProcessedEventRepository } from '../../../src/infrastructure/database/mongodb/repositories/processed-event.repository';
 import { ProcessedEventModel } from '../../../src/infrastructure/database/mongodb/models/processed-event.model';
 import { BaseEventHandler } from '../../../src/infrastructure/messaging/handlers/base-event-handler';
+import { setupIntegrationTests, teardownIntegrationTests, clearDatabase } from '../setup';
 import { EachMessagePayload } from 'kafkajs';
-import mongoose from 'mongoose';
+
+jest.mock('kafkajs');
 
 // Test handler
 class TestEventHandler extends BaseEventHandler {
@@ -21,21 +23,23 @@ describe('Kafka Consumer Integration Tests', () => {
     let processedEventRepo: ProcessedEventRepository;
 
     beforeAll(async () => {
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ecommerce-test');
+        await setupIntegrationTests();
         processedEventRepo = new ProcessedEventRepository();
     });
 
     afterAll(async () => {
-        await mongoose.connection.close();
+        await teardownIntegrationTests();
     });
 
     beforeEach(async () => {
-        await ProcessedEventModel.deleteMany({});
+        await clearDatabase();
     });
 
     describe('Consumer Connection', () => {
         it('should connect to Kafka and subscribe to topics', async () => {
             const kafka = getKafkaInstance();
+            console.log('DEBUG: Consumer Test Kafka keys:', Object.keys(kafka));
+            console.log('DEBUG: kafka.consumer type:', typeof kafka.consumer);
             const consumer = new KafkaConsumer(kafka, 'test-group');
 
             const handler = new TestEventHandler(processedEventRepo);
@@ -157,7 +161,6 @@ function createMockPayload(
             timestamp: Date.now().toString(),
             offset: '0',
             attributes: 0,
-            size: 0,
         },
         heartbeat: async () => { },
         pause: () => () => { },

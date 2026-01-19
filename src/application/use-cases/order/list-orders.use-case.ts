@@ -35,7 +35,7 @@ export class ListOrdersUseCase {
 
     // Map to DTOs
     const orderDTOs: OrderResponseDTO[] = orders.map((order: any) => {
-      const props = (order as any).props;
+      const props = (order).props;
       return {
         id: order.id,
         userId: props.userId,

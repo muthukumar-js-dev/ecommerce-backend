@@ -1,10 +1,10 @@
-import { InitiatePaymentHandler } from '../../../application/commands/initiate-payment.handler';
-import { InitiatePaymentCommand } from '../../../application/commands/initiate-payment.command';
-import { IPaymentRepository } from '../../../domain/repositories/payment.repository.interface';
-import { IPaymentGateway } from '../../../../../src/application/ports/payment-gateway.port';
-import { Money } from '../../../../../src/domain/product/value-objects/money.vo';
-import { success, failure } from '../../../../../src/shared/types/result';
-import { ExternalServiceError } from '../../../../../src/shared/errors/external-service.error';
+import { InitiatePaymentHandler } from '../../../src/application/commands/initiate-payment.handler';
+import { InitiatePaymentCommand } from '../../../src/application/commands/initiate-payment.command';
+import { IPaymentRepository } from '../../../src/domain/repositories/payment.repository.interface';
+import { IPaymentGateway } from '../../../../src/application/ports/payment-gateway.port';
+import { Money } from '../../../../src/domain/product/value-objects/money.vo';
+import { success, failure } from '../../../../src/shared/types/result';
+import { ExternalServiceError } from '../../../../src/shared/errors/external-service.error';
 
 describe('InitiatePaymentHandler', () => {
     let handler: InitiatePaymentHandler;

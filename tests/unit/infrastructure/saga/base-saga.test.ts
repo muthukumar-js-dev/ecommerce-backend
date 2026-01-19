@@ -25,9 +25,19 @@ class TestSaga extends BaseSaga {
     }
 }
 
+import { connectTestDatabase, disconnectTestDatabase } from '../../../utils/test-helpers';
+
 describe('BaseSaga', () => {
     let sagaRepository: SagaRepository;
     let testSaga: TestSaga;
+
+    beforeAll(async () => {
+        await connectTestDatabase();
+    });
+
+    afterAll(async () => {
+        await disconnectTestDatabase();
+    });
 
     beforeEach(() => {
         sagaRepository = new SagaRepository();

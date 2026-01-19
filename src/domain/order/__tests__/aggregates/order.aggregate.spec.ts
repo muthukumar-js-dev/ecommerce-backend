@@ -92,7 +92,7 @@ describe('Order Aggregate', () => {
       order.startProcessing();
       order.ship('TRACK123');
 
-      expect(() => order.cancel()).toThrow('Cannot transition');
+      expect(() => order.cancel()).toThrow('Order cannot be cancelled');
     });
   });
 });

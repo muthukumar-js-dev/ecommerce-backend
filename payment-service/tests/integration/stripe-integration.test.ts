@@ -1,6 +1,6 @@
 import nock from 'nock';
-import { StripeAdapter } from '../../../infrastructure/stripe/stripe.adapter';
-import { Money } from '../../../../src/domain/product/value-objects/money.vo';
+import { StripeAdapter } from '../../src/infrastructure/stripe/stripe.adapter';
+import { Money } from '../../../src/domain/product/value-objects/money.vo';
 
 describe('Stripe Integration (Mocked)', () => {
     let stripeAdapter: StripeAdapter;

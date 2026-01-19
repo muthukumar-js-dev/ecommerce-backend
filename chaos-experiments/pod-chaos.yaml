@@ -1,0 +1,38 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: pod-kill-experiment
+  namespace: chaos-testing
+  labels:
+    experiment: pod-kill
+    severity: medium
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    namespaces:
+      - ecommerce-prod
+    labelSelectors:
+      app: core-service
+  scheduler:
+    cron: '@every 2h'
+  duration: '30s'
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: pod-failure-experiment
+  namespace: chaos-testing
+  labels:
+    experiment: pod-failure
+    severity: high
+spec:
+  action: pod-failure
+  mode: fixed-percent
+  value: '20'
+  selector:
+    namespaces:
+      - ecommerce-prod
+    labelSelectors:
+      app: core-service
+  duration: '5m'

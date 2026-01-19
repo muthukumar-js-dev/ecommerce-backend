@@ -28,12 +28,12 @@ export class UpdateAddressUseCase {
     }
 
     // Update properties
-    if (dto.street) addressProps.street = dto.street;
-    if (dto.city) addressProps.city = dto.city;
-    if (dto.state) addressProps.state = dto.state;
-    if (dto.postalCode) addressProps.postalCode = dto.postalCode;
-    if (dto.country) addressProps.country = dto.country;
-    if (dto.isDefault !== undefined) addressProps.isDefault = dto.isDefault;
+    if (dto.street) {addressProps.street = dto.street;}
+    if (dto.city) {addressProps.city = dto.city;}
+    if (dto.state) {addressProps.state = dto.state;}
+    if (dto.postalCode) {addressProps.postalCode = dto.postalCode;}
+    if (dto.country) {addressProps.country = dto.country;}
+    if (dto.isDefault !== undefined) {addressProps.isDefault = dto.isDefault;}
 
     const updateResult = await this.addressRepository.update(address);
     if (!updateResult.success) {

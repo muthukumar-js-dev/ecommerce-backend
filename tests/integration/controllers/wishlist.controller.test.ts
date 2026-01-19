@@ -31,6 +31,7 @@ describe('Wishlist Controller Integration', () => {
       getWishlistService: jest.fn().mockReturnValue(mockWishlistService),
       getReviewService: jest.fn().mockReturnValue({}),
       getNotificationService: jest.fn().mockReturnValue({}),
+      getCQRSModule: jest.fn().mockReturnValue({ eventBus: {} }),
     });
 
     app = createApp();

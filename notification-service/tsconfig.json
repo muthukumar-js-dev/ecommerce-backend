@@ -15,10 +15,10 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "@domain/*": ["src/domain/*"],
-      "@application/*": ["src/application/*"],
-      "@infrastructure/*": ["src/infrastructure/*"],
-      "@api/*": ["src/api/*"],
+      "@domain/*": ["src/domain/*", "../src/domain/*"],
+      "@application/*": ["src/application/*", "../src/application/*"],
+      "@infrastructure/*": ["src/infrastructure/*", "../src/infrastructure/*"],
+      "@api/*": ["src/api/*", "../src/api/*"],
       "@shared/*": ["../src/shared/*"],
       "@shared/domain/*": ["../src/shared/domain/*", "../src/domain/*"],
       "@shared/types/*": ["../src/shared/types/*"],
@@ -29,6 +29,6 @@
       "@shared/messaging/*": ["../src/infrastructure/messaging/*"]
     }
   },
-  "include": ["src/**/*", "../src/shared/**/*", "../src/domain/**/*", "../src/application/**/*", "../src/infrastructure/**/*"],
+  "include": ["src/**/*", "../src/shared/**/*"],
   "exclude": ["node_modules", "dist", "tests"]
 }

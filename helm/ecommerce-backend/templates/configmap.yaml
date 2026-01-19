@@ -1,0 +1,33 @@
+{{- if not .Values.configMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ecommerce-backend.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ecommerce-backend.labels" . | nindent 4 }}
+data:
+  # Application configuration
+  NODE_ENV: {{ .Values.env.NODE_ENV | default "production" | quote }}
+  LOG_LEVEL: {{ .Values.env.LOG_LEVEL | default "info" | quote }}
+  PORT: {{ .Values.service.targetPort | default 3000 | quote }}
+  
+  # Service discovery
+  {{- if .Values.env.KAFKA_BROKERS }}
+  KAFKA_BROKERS: {{ .Values.env.KAFKA_BROKERS | quote }}
+  {{- end }}
+  {{- if .Values.env.REDIS_HOST }}
+  REDIS_HOST: {{ .Values.env.REDIS_HOST | quote }}
+  {{- end }}
+  {{- if .Values.env.REDIS_PORT }}
+  REDIS_PORT: {{ .Values.env.REDIS_PORT | quote }}
+  {{- end }}
+  {{- if .Values.env.MONGODB_URI }}
+  MONGODB_URI: {{ .Values.env.MONGODB_URI | quote }}
+  {{- end }}
+  
+  # Additional configuration
+  {{- range $key, $value := .Values.extraConfig }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}

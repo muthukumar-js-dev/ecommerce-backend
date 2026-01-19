@@ -31,6 +31,7 @@ describe('Address Controller Integration', () => {
       getWishlistService: jest.fn().mockReturnValue({}),
       getReviewService: jest.fn().mockReturnValue({}),
       getNotificationService: jest.fn().mockReturnValue({}),
+      getCQRSModule: jest.fn().mockReturnValue({ eventBus: {} }),
     });
 
     app = createApp();

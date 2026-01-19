@@ -1,0 +1,78 @@
+node_modules
+npm-debug.log
+yarn-error.log
+
+# TypeScript
+*.tsbuildinfo
+
+# Tests
+coverage
+*.test.ts
+*.spec.ts
+tests/
+
+# Build
+dist
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Logs
+logs
+*.log
+
+# Git
+.git
+.gitignore
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# CI/CD
+.github
+
+# Misc
+.prettierrc
+.prettierignore
+.eslintrc.js
+.eslintignore
+jest.config.js
+webpack.config.js
+
+# Scripts
+scripts/
+
+# Gemini prompts
+gemini-prompt/
+
+# Test artifacts
+test-*.txt
+test-*.log
+test-*.json
+*.backup
+error_*.log
+debug_*.txt
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Kubernetes
+k8s/
+helm/

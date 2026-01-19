@@ -17,6 +17,7 @@ import { GetUserProfileHandler } from '@application/queries/user/get-user-profil
 import { ListProductsHandler } from '@application/queries/product/list-products.handler';
 import { GetProductHandler } from '@application/queries/product/get-product.handler';
 import { GetOrderHistoryHandler } from '@application/queries/order/get-order-history.handler';
+import { GetOrderHandler } from '@application/queries/order/get-order.handler';
 
 // Event Handlers
 import { UserRegisteredHandler } from '@infrastructure/events/handlers/user-registered.handler';
@@ -33,7 +34,6 @@ import { OrderRepository } from '@infrastructure/database/mongodb/repositories/o
 import { OutboxRepository } from '@infrastructure/database/mongodb/repositories/outbox.repository';
 import { OrderReadRepository } from '@infrastructure/database/mongodb/read-models/order-read.repository';
 import { ProductRepository } from '@infrastructure/database/mongodb/repositories/product.repository';
-import { ProductReadRepository } from '@infrastructure/database/mongodb/read-models/product-read.repository';
 import { UserDomainService } from '@domain/user/services/user-domain.service';
 
 export class CQRSModule {
@@ -77,7 +77,6 @@ export class CQRSModule {
             new CreateProductHandler(productRepository, this.eventBus)
         );
 
-        // TODO: Inject JWT Secret from config
         const jwtSecret = process.env.JWT_SECRET || 'secret';
 
         this.commandBus.register(
@@ -103,9 +102,11 @@ export class CQRSModule {
 
     private registerQueryHandlers(): void {
         const userReadRepository = new UserReadRepository();
-        const productReadRepository = new ProductReadRepository();
+        // const productReadRepository = new ProductReadRepository(); // Unused
         const orderReadRepository = new OrderReadRepository();
-        const productRepository = new ProductRepository(); // Needed for UseCase based queries if not ReadModel
+        const outboxRepository = new OutboxRepository();
+        const productRepository = new ProductRepository(outboxRepository); // Needed for UseCase based queries if not ReadModel
+        const orderRepository = new OrderRepository(outboxRepository);
 
         this.queryBus.register(
             'GetUserProfileQuery',
@@ -114,7 +115,7 @@ export class CQRSModule {
 
         this.queryBus.register(
             'ListProductsQuery',
-            new ListProductsHandler(productReadRepository)
+            new ListProductsHandler(productRepository)
         );
 
         this.queryBus.register(
@@ -125,6 +126,11 @@ export class CQRSModule {
         this.queryBus.register(
             'GetOrderHistoryQuery',
             new GetOrderHistoryHandler(orderReadRepository)
+        );
+
+        this.queryBus.register(
+            'GetOrderQuery',
+            new GetOrderHandler(orderRepository)
         );
     }
 
@@ -138,7 +144,7 @@ export class CQRSModule {
         // Order Events
         const outboxRepository = new OutboxRepository();
         const userRepository = new UserRepository(outboxRepository);
-        const productRepository = new ProductRepository();
+        const productRepository = new ProductRepository(outboxRepository);
 
         this.eventBus.subscribe('OrderPlaced', new OrderPlacedHandler());
         this.eventBus.subscribe('OrderPlaced', new SendOrderConfirmationEmailHandler());

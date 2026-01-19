@@ -1,5 +1,5 @@
-import { OrderPlacedHandler } from '../../../infrastructure/messaging/handlers/order-placed.handler';
-import { InitiatePaymentHandler } from '../../../application/commands/initiate-payment.handler';
+import { OrderPlacedHandler } from '../../../src/infrastructure/messaging/handlers/order-placed.handler';
+import { InitiatePaymentHandler } from '../../../src/application/commands/initiate-payment.handler';
 import { EachMessagePayload } from 'kafkajs';
 
 describe('OrderPlacedHandler', () => {

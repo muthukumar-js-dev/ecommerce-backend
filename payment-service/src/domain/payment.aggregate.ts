@@ -1,6 +1,6 @@
 import { AggregateRoot } from '@shared/domain/aggregate-root';
 import { ID } from '@shared/types/common';
-import { Money } from '@shared/domain/product/value-objects/money.vo';
+import { Money } from '../../../src/domain/product/value-objects/money.vo';
 import { PaymentInitiated } from './events/payment-initiated.event';
 import { PaymentSucceeded } from './events/payment-succeeded.event';
 import { PaymentFailed } from './events/payment-failed.event';

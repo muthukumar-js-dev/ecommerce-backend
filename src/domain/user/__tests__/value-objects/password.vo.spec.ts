@@ -1,11 +1,11 @@
-import { Password } from '../../../value-objects/password.vo';
+import { Password } from '../../value-objects/password.vo';
 import { ValidationError } from '@shared/errors';
 
 describe('Password Value Object', () => {
   it('should create a password and hash it', async () => {
     const plain = 'Password123';
     const password = await Password.create(plain);
-    
+
     expect(password.hash).toBeDefined();
     expect(password.hash).not.toBe(plain);
   });
@@ -13,10 +13,10 @@ describe('Password Value Object', () => {
   it('should compare password correctly', async () => {
     const plain = 'Password123';
     const password = await Password.create(plain);
-    
+
     const isValid = await password.compare(plain);
     const isInvalid = await password.compare('WrongPass123');
-    
+
     expect(isValid).toBe(true);
     expect(isInvalid).toBe(false);
   });

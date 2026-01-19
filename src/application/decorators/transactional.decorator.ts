@@ -2,8 +2,8 @@ import mongoose from 'mongoose';
 
 export function Transactional() {
     return function (
-        target: any,
-        propertyKey: string,
+        _target: any,
+        _propertyKey: string,
         descriptor: PropertyDescriptor
     ) {
         const originalMethod = descriptor.value;
@@ -26,7 +26,7 @@ export function Transactional() {
                 await session.abortTransaction();
                 throw error;
             } finally {
-                session.endSession();
+                await session.endSession();
             }
         };
 

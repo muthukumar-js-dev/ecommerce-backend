@@ -1,0 +1,125 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config-advanced
+  namespace: monitoring
+data:
+  alertmanager.yml: |
+    global:
+      resolve_timeout: 5m
+      slack_api_url: 'https://hooks.slack.com/services/YOUR/WEBHOOK/URL'
+      pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+
+    templates:
+      - '/etc/alertmanager/templates/*.tmpl'
+
+    route:
+      group_by: ['alertname', 'cluster', 'service']
+      group_wait: 10s
+      group_interval: 10s
+      repeat_interval: 12h
+      receiver: 'default'
+      
+      routes:
+        # Critical alerts go to PagerDuty and Slack
+        - match:
+            severity: critical
+          receiver: 'pagerduty-critical'
+          continue: true
+        
+        - match:
+            severity: critical
+          receiver: 'slack-critical'
+          group_wait: 10s
+          group_interval: 5m
+          repeat_interval: 4h
+        
+        # Warning alerts go to Slack only
+        - match:
+            severity: warning
+          receiver: 'slack-warnings'
+          group_wait: 30s
+          group_interval: 10m
+          repeat_interval: 12h
+        
+        # SLA violations go to leadership
+        - match:
+            category: sla
+          receiver: 'slack-leadership'
+          continue: true
+
+    receivers:
+      - name: 'default'
+        slack_configs:
+          - channel: '#alerts'
+            title: 'Alert: {{ .GroupLabels.alertname }}'
+            text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+            send_resolved: true
+
+      - name: 'pagerduty-critical'
+        pagerduty_configs:
+          - service_key: 'YOUR_PAGERDUTY_SERVICE_KEY'
+            description: '{{ .GroupLabels.alertname }}: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+            details:
+              firing: '{{ .Alerts.Firing | len }}'
+              resolved: '{{ .Alerts.Resolved | len }}'
+              num_alerts: '{{ .Alerts | len }}'
+            client: 'Prometheus'
+            client_url: '{{ .ExternalURL }}'
+
+      - name: 'slack-critical'
+        slack_configs:
+          - channel: '#incidents'
+            username: 'AlertManager'
+            icon_emoji: ':rotating_light:'
+            title: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+            title_link: '{{ range .Alerts }}{{ .Annotations.dashboard_url }}{{ end }}'
+            text: |
+              *Summary:* {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+              *Description:* {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+              *Runbook:* {{ range .Alerts }}{{ .Annotations.runbook_url }}{{ end }}
+              *Team:* {{ .GroupLabels.team }}
+              *Severity:* {{ .GroupLabels.severity }}
+            color: 'danger'
+            send_resolved: true
+
+      - name: 'slack-warnings'
+        slack_configs:
+          - channel: '#alerts'
+            username: 'AlertManager'
+            icon_emoji: ':warning:'
+            title: '⚠️  WARNING: {{ .GroupLabels.alertname }}'
+            text: |
+              *Description:* {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+              *Team:* {{ .GroupLabels.team }}
+              *Runbook:* {{ range .Alerts }}{{ .Annotations.runbook_url }}{{ end }}
+            color: 'warning'
+            send_resolved: true
+
+      - name: 'slack-leadership'
+        slack_configs:
+          - channel: '#leadership-alerts'
+            username: 'AlertManager'
+            icon_emoji: ':chart_with_downwards_trend:'
+            title: '📊 SLA Alert: {{ .GroupLabels.alertname }}'
+            text: |
+              *Summary:* {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+              *Description:* {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+              *Impact:* Business SLA violation
+            color: 'danger'
+            send_resolved: true
+
+    inhibit_rules:
+      # Inhibit warning if critical is firing
+      - source_match:
+          severity: 'critical'
+        target_match:
+          severity: 'warning'
+        equal: ['alertname', 'cluster', 'service']
+      
+      # Inhibit high latency if critical latency is firing
+      - source_match:
+          alertname: 'CriticalLatency'
+        target_match:
+          alertname: 'HighLatency'
+        equal: ['cluster', 'service']

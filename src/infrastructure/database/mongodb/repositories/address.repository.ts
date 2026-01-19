@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+
 import { IAddressRepository } from '@domain/address/repositories/address.repository.interface';
 import { Address, AddressProps } from '@domain/address/entities/address.entity';
 import { AddressModel, IAddressDocument } from '../schemas/address.schema';
@@ -103,8 +103,8 @@ export class AddressRepository implements IAddressRepository {
   private toPersistence(address: Address): Partial<IAddressDocument> {
     const props = (address as unknown as { props: AddressProps }).props;
     return {
-      _id: address.id as unknown as mongoose.Types.ObjectId,
-      userId: props.userId as unknown as mongoose.Types.ObjectId,
+      _id: address.id, // Keep as string - Address model uses string IDs
+      userId: props.userId, // Keep as string - User model uses string IDs
       name: props.name,
       firstLine: props.firstLine,
       secondLine: props.secondLine,

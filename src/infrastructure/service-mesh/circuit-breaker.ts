@@ -43,7 +43,7 @@ export class CircuitBreaker {
                 this.successCount = 0;
             } else {
                 throw new Error(
-                    `Circuit breaker is OPEN for ${this.serviceName}. Next attempt at ${this.nextAttemptTime}`
+                    `Circuit breaker is OPEN for ${this.serviceName}. Next attempt at ${this.nextAttemptTime?.toISOString() ?? 'unknown'}`
                 );
             }
         }

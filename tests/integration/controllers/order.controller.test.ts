@@ -20,7 +20,7 @@ describe('Order Controller Integration', () => {
     process.env.JWT_SECRET = 'test-secret';
     jest.clearAllMocks();
 
-    mockOrderService = new OrderService({} as any, {} as any) as jest.Mocked<OrderService>;
+    mockOrderService = new OrderService({} as any, {} as any, {} as any) as jest.Mocked<OrderService>;
 
     (Container.getInstance as jest.Mock).mockReturnValue({
       getUserService: jest.fn().mockReturnValue({}),
@@ -31,6 +31,7 @@ describe('Order Controller Integration', () => {
       getWishlistService: jest.fn().mockReturnValue({}),
       getReviewService: jest.fn().mockReturnValue({}),
       getNotificationService: jest.fn().mockReturnValue({}),
+      getCQRSModule: jest.fn().mockReturnValue({ eventBus: {} }),
     });
 
     app = createApp();

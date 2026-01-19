@@ -4,6 +4,7 @@ import { QueryBus } from '../queries/query-bus';
 import { EventBus } from '@infrastructure/events/event-bus';
 import { PlaceOrderCommand } from '../commands/order/place-order.command';
 import { GetOrderHistoryQuery } from '../queries/order/get-order-history.query';
+import { GetOrderQuery } from '../queries/order/get-order.query';
 import {
   PlaceOrderRequestDTO,
   OrderResponseDTO,
@@ -11,7 +12,7 @@ import {
   CancelOrderItemRequestDTO,
   UpdateOrderStatusRequestDTO,
 } from '../dtos/order/order.dto';
-import { AsyncResult } from '@shared/types/result';
+import { AsyncResult, Result } from '@shared/types/result';
 import { ID } from '@shared/types/common';
 import { LogExecution } from '../decorators/logging.decorator';
 
@@ -29,7 +30,7 @@ export class OrderService extends BaseApplicationService {
    */
   @LogExecution()
   async placeOrder(userId: ID, dto: PlaceOrderRequestDTO): AsyncResult<OrderResponseDTO> {
-    const command = new PlaceOrderCommand(userId, dto.shippingAddressId, dto.paymentMethod);
+    const command = new PlaceOrderCommand(userId, dto.items, dto.shippingAddressId, dto.paymentMethod);
     return this.executeCommand<AsyncResult<OrderResponseDTO>>(command);
   }
 
@@ -37,15 +38,15 @@ export class OrderService extends BaseApplicationService {
    * Get order by ID
    */
   @LogExecution()
-  async getOrder(orderId: ID): AsyncResult<OrderResponseDTO> {
-    throw new Error("Method not implemented.");
+  getOrder(orderId: ID): AsyncResult<OrderResponseDTO> {
+    return this.executeQuery<Result<OrderResponseDTO>>(new GetOrderQuery(orderId));
   }
 
   /**
    * List user's orders
    */
   @LogExecution()
-  async listOrders(userId: ID, skip?: number, limit?: number): AsyncResult<ListOrdersResponseDTO> {
+  async listOrders(userId: ID, _skip?: number, _limit?: number): AsyncResult<ListOrdersResponseDTO> {
     const query = new GetOrderHistoryQuery(userId);
     return this.executeQuery<AsyncResult<ListOrdersResponseDTO>>(query);
   }
@@ -54,7 +55,7 @@ export class OrderService extends BaseApplicationService {
    * Cancel an order item
    */
   @LogExecution()
-  async cancelOrderItem(orderId: ID, dto: CancelOrderItemRequestDTO): AsyncResult<void> {
+  cancelOrderItem(_orderId: ID, _dto: CancelOrderItemRequestDTO): AsyncResult<void> {
     throw new Error("Method not implemented.");
   }
 
@@ -62,7 +63,7 @@ export class OrderService extends BaseApplicationService {
    * Update order status
    */
   @LogExecution()
-  async updateOrderStatus(orderId: ID, dto: UpdateOrderStatusRequestDTO): AsyncResult<void> {
+  updateOrderStatus(_orderId: ID, _dto: UpdateOrderStatusRequestDTO): AsyncResult<void> {
     throw new Error("Method not implemented.");
   }
 }

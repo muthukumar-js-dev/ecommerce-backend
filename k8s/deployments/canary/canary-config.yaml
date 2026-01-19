@@ -1,0 +1,90 @@
+apiVersion: flagger.app/v1beta1
+kind: Canary
+metadata:
+  name: core-service
+  namespace: ecommerce-prod
+spec:
+  # Deployment reference
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: core-service
+  
+  # Deployment strategy
+  progressDeadlineSeconds: 600
+  
+  # HPA reference (optional)
+  autoscalerRef:
+    apiVersion: autoscaling/v2
+    kind: HorizontalPodAutoscaler
+    name: core-service
+  
+  # Service configuration
+  service:
+    port: 80
+    targetPort: 3000
+    portDiscovery: true
+  
+  # Canary analysis
+  analysis:
+    # Schedule interval
+    interval: 1m
+    
+    # Max number of failed metric checks before rollback
+    threshold: 5
+    
+    # Max traffic percentage routed to canary
+    maxWeight: 50
+    
+    # Canary increment step
+    stepWeight: 10
+    
+    # Promotion criteria
+    metrics:
+      # Request success rate
+      - name: request-success-rate
+        thresholdRange:
+          min: 99
+        interval: 1m
+      
+      # Request duration P95
+      - name: request-duration
+        thresholdRange:
+          max: 500
+        interval: 1m
+      
+      # Error rate
+      - name: error-rate
+        thresholdRange:
+          max: 1
+        interval: 1m
+    
+    # Webhooks for additional validation
+    webhooks:
+      # Load testing
+      - name: load-test
+        type: rollout
+        url: http://flagger-loadtester.ecommerce-prod/
+        timeout: 5s
+        metadata:
+          type: cmd
+          cmd: "hey -z 1m -q 10 -c 2 http://core-service-canary.ecommerce-prod/"
+      
+      # Acceptance testing
+      - name: acceptance-test
+        type: pre-rollout
+        url: http://flagger-loadtester.ecommerce-prod/
+        timeout: 30s
+        metadata:
+          type: bash
+          cmd: "curl -sd 'test' http://core-service-canary.ecommerce-prod/health | grep -q 'ok'"
+      
+      # Slack notifications
+      - name: slack-notification
+        type: event
+        url: https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+        metadata:
+          message: |
+            Canary deployment {{ .Name }} is progressing
+            Current weight: {{ .CanaryWeight }}%
+            Status: {{ .Status }}

@@ -15,12 +15,12 @@ export class UpdateUserStatsStep implements SagaStep {
 
         console.log(`📊 Updating stats for user ${userId}`);
 
-        const userResult = await this.userRepository.findById(userId);
-        if (!userResult.success || !userResult.data) {
+        const user = await this.userRepository.findById(userId);
+        if (!user) {
             throw new Error(`User not found: ${userId}`);
         }
 
-        const user = userResult.data;
+
 
         // Increment order count
         user.incrementOrderCount();
@@ -38,9 +38,8 @@ export class UpdateUserStatsStep implements SagaStep {
 
         console.log(`🔙 Reverting stats for user ${userId}`);
 
-        const userResult = await this.userRepository.findById(userId);
-        if (userResult.success && userResult.data) {
-            const user = userResult.data;
+        const user = await this.userRepository.findById(userId);
+        if (user) {
 
             // Decrement order count
             user.decrementOrderCount();

@@ -92,7 +92,6 @@ export class StripeAdapter implements IPaymentGateway {
             case 'succeeded':
                 return 'succeeded';
             case 'canceled':
-            case 'payment_failed':
                 return 'failed';
             default:
                 return 'pending';

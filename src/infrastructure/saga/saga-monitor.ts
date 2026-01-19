@@ -1,5 +1,5 @@
 import { SagaRepository } from './saga.repository';
-import { SagaStatus } from './saga.interface';
+
 
 export interface SagaMetrics {
     total: number;
@@ -57,7 +57,7 @@ export class SagaMonitor {
             console.warn(`⚠️ Found ${stuckSagas.length} stuck sagas (running > ${thresholdMinutes} minutes)`);
 
             for (const saga of stuckSagas) {
-                console.warn(`  - Saga ${saga.sagaId} (${saga.type}): ${saga.status} since ${saga.createdAt}`);
+                console.warn(`  - Saga ${saga.sagaId} (${saga.type}): ${saga.status} since ${saga.createdAt.toISOString()}`);
             }
 
             // In production, send alert to monitoring system

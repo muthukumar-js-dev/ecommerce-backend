@@ -21,7 +21,7 @@ export class GetOrderUseCase {
     }
 
     // Map to DTO
-    const props = (order as any).props;
+    const props = (order).props;
     return success({
       id: order.id,
       userId: props.userId,

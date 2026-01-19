@@ -7,21 +7,23 @@ import { Result, success, failure } from '@shared/types/result';
 import { SKU } from '@domain/product/value-objects/sku.vo';
 import { Money } from '@domain/product/value-objects/money.vo';
 import { Quantity } from '@domain/product/value-objects/quantity.vo';
-import { ID } from '@shared/types/common';
 import { ConflictError } from '@shared/errors';
+import { ProductResponseDTO } from '@application/dtos/product/product.dto';
+import { randomUUID } from 'crypto';
 
-export class CreateProductHandler implements CommandHandler<CreateProductCommand, ID> {
+export class CreateProductHandler implements CommandHandler<CreateProductCommand, ProductResponseDTO> {
     constructor(
         private readonly productRepository: IProductRepository,
         private readonly eventBus: EventBus
     ) { }
 
-    async handle(command: CreateProductCommand): Promise<Result<ID>> {
+    async handle(command: CreateProductCommand): Promise<Result<ProductResponseDTO>> {
         try {
             // 1. Check if product exists (sku uniqueness)
             const sku = SKU.create(command.sku);
             const existing = await this.productRepository.findBySku(sku);
             if (existing) {
+                console.error('[CreateProductHandler] Conflict: SKU exists', command.sku);
                 return failure(new ConflictError(`Product with SKU ${command.sku} already exists`));
             }
 
@@ -40,19 +42,51 @@ export class CreateProductHandler implements CommandHandler<CreateProductCommand
                     productDetails: command.productDetails,
                     sellerId: command.sellerId,
                 },
-                new Date().getTime().toString() // Generate ID (or use UUID lib if available)
+                randomUUID()
             );
 
             // 3. Persist
-            await this.productRepository.save(product);
+            const saveResult = await this.productRepository.save(product);
+            if (!saveResult.success) {
+                console.error('[CreateProductHandler] Save Failed:', saveResult.error);
+                return failure(saveResult.error);
+            }
 
             // 4. Publish Events
             await this.eventBus.publishAll(product.domainEvents);
             product.clearDomainEvents();
 
-            return success(product.id);
+            const dto = this.toDTO(saveResult.data);
+            console.log('[CreateProductHandler] Success:', JSON.stringify(dto));
+            return success(dto);
         } catch (error) {
+            console.error('[CreateProductHandler] Error:', error);
             return failure(error as Error);
         }
+    }
+
+    private toDTO(product: Product): ProductResponseDTO {
+        return {
+            id: product.id,
+            pid: product.sku.value,
+            title: product.title,
+            category: product.category,
+            actualPrice: product.actualPrice.amount,
+            sellingPrice: product.sellingPrice.amount,
+            discount: product.discountPercentage,
+            brand: (product as any).props.brand, // Accessing protected prop until public getter is verified/added
+            description: product.description,
+            outOfStock: !product.isAvailable,
+            inventory: product.inventory.value,
+            images: product.images,
+            productDetails: (product as any).props.productDetails,
+            averageRating: product.averageRating,
+            sellerId: product.sellerId,
+            subCategory: (product as any).props.subCategory,
+            stripeId: product.stripeId,
+            url: product.url,
+            createdAt: product.createdAt.toISOString(),
+            updatedAt: product.updatedAt.toISOString(),
+        };
     }
 }

@@ -9,7 +9,7 @@ describe('User Aggregate', () => {
             const user = await createTestUser();
 
             expect(user).toBeDefined();
-            expect(user.id.value).toBe('user-123');
+            expect(user.id).toBe('user-123');
             expect(user.name).toBe('Test User');
             expect(user.email.value).toBe('test@example.com');
             expect(user.role).toBe(UserRole.USER);
@@ -23,7 +23,7 @@ describe('User Aggregate', () => {
 
             const events = user.domainEvents;
             expect(events).toHaveLength(1);
-            expect(events[0].eventName).toBe('UserRegistered');
+            expect(events[0]!.eventName).toBe('UserRegistered');
         });
     });
 
@@ -95,7 +95,7 @@ describe('User Aggregate', () => {
 
             const events = user.domainEvents;
             expect(events).toHaveLength(1);
-            expect(events[0].eventName).toBe('UserRoleChanged');
+            expect(events[0]!.eventName).toBe('UserRoleChanged');
         });
 
         it('should raise UserLoggedIn event on login', async () => {
@@ -106,7 +106,7 @@ describe('User Aggregate', () => {
 
             const events = user.domainEvents;
             expect(events).toHaveLength(1);
-            expect(events[0].eventName).toBe('UserLoggedIn');
+            expect(events[0]!.eventName).toBe('UserLoggedIn');
         });
 
         it('should update lastLogin timestamp on login', async () => {

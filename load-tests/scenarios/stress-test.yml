@@ -1,0 +1,38 @@
+config:
+  target: 'https://api.yourdomain.com'
+  phases:
+    # Find breaking point
+    - duration: 600
+      arrivalRate: 1000
+      rampTo: 200000
+      name: 'Stress test - find breaking point'
+    
+    # Sustained stress
+    - duration: 300
+      arrivalRate: 200000
+      name: 'Sustained stress'
+    
+    # Recovery test
+    - duration: 300
+      arrivalRate: 200000
+      rampTo: 1000
+      name: 'Recovery ramp down'
+
+scenarios:
+  - name: 'Heavy Load'
+    weight: 100
+    flow:
+      - get:
+          url: '/api/products?page={{ $randomNumber(1, 1000) }}&limit=50'
+      - post:
+          url: '/api/users/login'
+          json:
+            email: 'stress@example.com'
+            password: 'Test@123'
+      - get:
+          url: '/api/orders'
+      - post:
+          url: '/api/cart/add'
+          json:
+            productId: '{{ $randomString() }}'
+            quantity: 1

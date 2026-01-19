@@ -77,18 +77,20 @@ export class OrderRepository implements IOrderRepository {
         await this.outboxRepository.save(event, KafkaTopic.ORDER_EVENTS, session);
       }
 
+      const storedOrder = this.toDomain(doc);
+
       // 3. Commit transaction
       await session.commitTransaction();
 
       // 4. Clear domain events
       order.clearDomainEvents();
 
-      return success(this.toDomain(doc!));
+      return success(storedOrder);
     } catch (error) {
       await session.abortTransaction();
       return failure(new DatabaseError('Failed to save order', 'ORDER_SAVE_ERROR', error as Error));
     } finally {
-      session.endSession();
+      await session.endSession();
     }
   }
 

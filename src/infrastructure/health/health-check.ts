@@ -21,7 +21,7 @@ interface HealthCheck {
 export function createHealthRoute(): Router {
   const router = Router();
 
-  router.get('/health', async (_req: Request, res: Response) => {
+  router.get('/health', (_req: Request, res: Response) => {
     const health: HealthCheck = {
       status: 'healthy',
       timestamp: Date.now(),
@@ -41,10 +41,10 @@ export function createHealthRoute(): Router {
 
     try {
       // Check database connection
-      if (mongoose.connection.readyState === 1) {
+      if ((mongoose.connection.readyState as number) === 1) {
         // Connected
         health.checks.database = 'healthy';
-      } else if (mongoose.connection.readyState === 2) {
+      } else if ((mongoose.connection.readyState as number) === 2) {
         // Connecting
         health.checks.database = 'unknown';
         health.status = 'unhealthy';
@@ -73,24 +73,24 @@ export function createHealthRoute(): Router {
 
       // Determine overall status code
       const statusCode = health.status === 'healthy' ? 200 : 503;
-      
+
       res.status(statusCode).json(health);
-    } catch (error) {
+    } catch {
       health.status = 'unhealthy';
       res.status(503).json(health);
     }
   });
 
   // Readiness probe - checks if app is ready to receive traffic
-  router.get('/ready', async (_req: Request, res: Response) => {
+  router.get('/ready', (_req: Request, res: Response) => {
     try {
       // Check if database is connected
-      if (mongoose.connection.readyState === 1) {
+      if ((mongoose.connection.readyState as number) === 1) {
         res.status(200).json({ ready: true });
       } else {
         res.status(503).json({ ready: false, reason: 'Database not connected' });
       }
-    } catch (error) {
+    } catch {
       res.status(503).json({ ready: false, reason: 'Error checking readiness' });
     }
   });

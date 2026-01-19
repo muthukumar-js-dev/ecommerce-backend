@@ -1,8 +1,8 @@
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const { MongoMemoryReplSet } = require('mongodb-memory-server');
 
 module.exports = async function globalSetup() {
-  console.log('Global Setup: Starting MongoDB Memory Server...');
-  const instance = await MongoMemoryServer.create();
+  console.log('Global Setup: Starting MongoDB Memory Replica Set...');
+  const instance = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
   const uri = instance.getUri();
   console.log('Global Setup: Mongo URI:', uri);
   

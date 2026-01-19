@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 export async function connectToTestDB(uri: string): Promise<void> {
-  if (mongoose.connection.readyState !== 0) {
+  if ((mongoose.connection.readyState as number) !== 0) {
     await mongoose.disconnect();
   }
   await mongoose.connect(uri);

@@ -71,10 +71,14 @@ export class UserRepository implements IUserRepository {
     session.startTransaction();
 
     try {
-      // 1. Save user to database
+      // 1. Save/Update user in database (Upsert)
       const persistenceData = this.toPersistence(user);
-      const doc = new UserModel(persistenceData);
-      await doc.save({ session });
+
+      const doc = await UserModel.findByIdAndUpdate(
+        user.id,
+        persistenceData,
+        { new: true, upsert: true, runValidators: true, session }
+      ).exec();
 
       // 2. Save domain events to outbox
       for (const event of user.domainEvents) {
@@ -100,7 +104,7 @@ export class UserRepository implements IUserRepository {
         new DatabaseError('Failed to save user', 'USER_SAVE_ERROR', error as Error)
       );
     } finally {
-      session.endSession();
+      await session.endSession();
     }
   }
 
@@ -139,7 +143,7 @@ export class UserRepository implements IUserRepository {
         new DatabaseError('Failed to update user', 'USER_UPDATE_ERROR', error as Error)
       );
     } finally {
-      session.endSession();
+      await session.endSession();
     }
   }
 
@@ -209,7 +213,7 @@ export class UserRepository implements IUserRepository {
         } else {
           phoneNumber = PhoneNumber.create('+91', doc.shopMobileNumber);
         }
-      } catch (e) {
+      } catch {
         // Log error? For now ignore invalid phone numbers in DB
       }
     }

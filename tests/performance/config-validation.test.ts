@@ -17,12 +17,14 @@ describe('Performance Test Configuration', () => {
         const configPath = path.join(__dirname, '../../performance/order-placement.yml');
         const fileContents = fs.readFileSync(configPath, 'utf8');
 
-        let config;
+        let config: any;
         expect(() => {
             config = yaml.load(fileContents);
         }).not.toThrow();
 
         expect(config).toBeDefined();
+        if (!config) throw new Error('Config is undefined');
+
         expect(config.config).toBeDefined();
         expect(config.scenarios).toBeDefined();
     });

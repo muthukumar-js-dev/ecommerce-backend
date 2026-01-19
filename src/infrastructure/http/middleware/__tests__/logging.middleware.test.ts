@@ -106,7 +106,7 @@ describe('Logging Middleware', () => {
     const finishHandler = onMock.mock.calls[0][1];
     finishHandler();
 
-    const responseLog = consoleSpy.mock.calls[1]?.[0] as any;
+    const responseLog = consoleSpy.mock.calls[1]?.[0];
     expect(responseLog?.duration).toMatch(/\d+ms/);
   });
 });

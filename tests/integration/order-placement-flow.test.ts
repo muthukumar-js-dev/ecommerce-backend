@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { setupIntegrationTests, teardownIntegrationTests, clearDatabase, sleep, createTestUser, createTestProduct, createTestOrder } from './setup';
+import { setupIntegrationTests, teardownIntegrationTests, clearDatabase, sleep, createTestUser, createTestProduct } from './setup';
 import { Application } from 'express';
 
 describe('Order Placement Flow - Integration Test', () => {
@@ -23,37 +23,49 @@ describe('Order Placement Flow - Integration Test', () => {
     describe('Complete Order Flow', () => {
         it('should complete full order placement flow', async () => {
             // 1. Register user
-            const userData = createTestUser();
+            const userData = { ...createTestUser(), userRole: 'admin' };
             const registerResponse = await request(app)
                 .post('/api/users/register')
                 .send(userData)
                 .expect(201);
 
-            token = registerResponse.body.token;
-            userId = registerResponse.body.userId;
+            userId = registerResponse.body.data.userId;
+            expect(userId).toBeDefined();
+
+            // 1b. Login to get token
+            const loginResponse = await request(app)
+                .post('/api/users/login')
+                .send({
+                    email: userData.email,
+                    password: userData.password,
+                })
+                .expect(200);
+
+            token = loginResponse.body.data.token;
             expect(token).toBeDefined();
             expect(userId).toBeDefined();
 
             // 2. Create product
-            const productData = createTestProduct();
+            const productData = { ...createTestProduct(), sellerId: userId };
             const productResponse = await request(app)
                 .post('/api/products')
                 .set('Authorization', `Bearer ${token}`)
                 .send(productData)
                 .expect(201);
 
-            productId = productResponse.body.productId || productResponse.body.id;
+            productId = productResponse.body.data;
             expect(productId).toBeDefined();
 
             // 3. Add to cart
-            await request(app)
-                .post('/api/cart/add')
+            const addToCartRes = await request(app)
+                .post('/api/cart/items')
                 .set('Authorization', `Bearer ${token}`)
                 .send({
                     productId,
                     quantity: 2,
-                })
-                .expect(200);
+                });
+
+            expect(addToCartRes.status).toBe(200);
 
             // 4. Get cart
             const cartResponse = await request(app)
@@ -61,65 +73,101 @@ describe('Order Placement Flow - Integration Test', () => {
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200);
 
-            expect(cartResponse.body.items).toHaveLength(1);
-            expect(cartResponse.body.items[0].productId).toBe(productId);
-            expect(cartResponse.body.items[0].quantity).toBe(2);
+            expect(cartResponse.body.data.items).toHaveLength(1);
+            expect(cartResponse.body.data.items[0].productId).toBe(productId);
+            expect(cartResponse.body.data.items[0].quantity).toBe(2);
 
-            // 5. Place order
-            const orderData = createTestOrder();
+            // 5. Create shipping address
+            const addressData = {
+                name: 'Test User',
+                mobileNumber: '1234567890',
+                address: '123 Test St',
+                locality: 'Test Locality',
+                city: 'Test City',
+                state: 'Test State',
+                pincode: '123456',
+                addressType: 'HOME'
+            };
+            const addressResponse = await request(app)
+                .post('/api/addresses')
+                .set('Authorization', `Bearer ${token}`)
+                .send(addressData)
+                .send(addressData);
+
+            expect(addressResponse.status).toBe(201);
+
+            const addressId = addressResponse.body.data.id;
+            expect(addressId).toBeDefined();
+
+            // 6. Place order
+            const orderData = {
+                shippingAddressId: addressId,
+                paymentMethod: 'card'
+            };
             const orderResponse = await request(app)
                 .post('/api/orders')
                 .set('Authorization', `Bearer ${token}`)
-                .send(orderData)
-                .expect(201);
+                .send(orderData);
 
-            const { orderId, orderNumber } = orderResponse.body;
+            expect(orderResponse.status).toBe(201);
+
+            const { id: orderId, orderNumber } = orderResponse.body.data;
             expect(orderId).toBeDefined();
             expect(orderNumber).toBeDefined();
 
-            // 6. Wait for async processing
+            // 7. Wait for async processing
             await sleep(2000);
 
-            // 7. Verify order created
+            // 8. Verify order created
             const orderCheck = await request(app)
                 .get(`/api/orders/${orderId}`)
-                .set('Authorization', `Bearer ${token}`)
-                .expect(200);
+                .set('Authorization', `Bearer ${token}`);
 
-            expect(orderCheck.body.id).toBe(orderId);
-            expect(orderCheck.body.status).toBeDefined();
+            expect(orderCheck.status).toBe(200);
 
-            // 8. Verify inventory updated
+            expect(orderCheck.body.data.id).toBe(orderId);
+            expect(orderCheck.body.data.status).toBeDefined();
+
+            // 9. Verify inventory updated
             const productCheck = await request(app)
                 .get(`/api/products/${productId}`)
                 .expect(200);
 
-            expect(productCheck.body.inventory).toBeLessThan(100);
+            expect(productCheck.body.data.inventory).toBeLessThan(100);
         });
 
         it('should handle out of stock scenario', async () => {
             // 1. Register user
-            const userData = createTestUser();
-            const registerResponse = await request(app)
+            const userData = { ...createTestUser(), userRole: 'admin' };
+            const regRes = await request(app)
                 .post('/api/users/register')
                 .send(userData)
                 .expect(201);
+            userId = regRes.body.data.userId;
 
-            token = registerResponse.body.token;
+            const loginResponse = await request(app)
+                .post('/api/users/login')
+                .send({
+                    email: userData.email,
+                    password: userData.password,
+                })
+                .expect(200);
+
+            token = loginResponse.body.data.token;
 
             // 2. Create product with low inventory
-            const productData = { ...createTestProduct(), inventory: 1 };
+            const productData = { ...createTestProduct(), inventory: 1, sellerId: userId };
             const productResponse = await request(app)
                 .post('/api/products')
                 .set('Authorization', `Bearer ${token}`)
                 .send(productData)
                 .expect(201);
 
-            productId = productResponse.body.productId || productResponse.body.id;
+            productId = productResponse.body.data;
 
             // 3. Try to add more than available
             const response = await request(app)
-                .post('/api/cart/add')
+                .post('/api/cart/items')
                 .set('Authorization', `Bearer ${token}`)
                 .send({
                     productId,
@@ -134,27 +182,36 @@ describe('Order Placement Flow - Integration Test', () => {
     describe('Cart Operations', () => {
         beforeEach(async () => {
             // Setup user and product
-            const userData = createTestUser();
-            const registerResponse = await request(app)
+            const userData = { ...createTestUser(), userRole: 'admin' };
+            const regRes = await request(app)
                 .post('/api/users/register')
                 .send(userData)
                 .expect(201);
+            userId = regRes.body.data.userId;
 
-            token = registerResponse.body.token;
+            const loginResponse = await request(app)
+                .post('/api/users/login')
+                .send({
+                    email: userData.email,
+                    password: userData.password,
+                })
+                .expect(200);
 
-            const productData = createTestProduct();
+            token = loginResponse.body.data.token;
+
+            const productData = { ...createTestProduct(), sellerId: userId };
             const productResponse = await request(app)
                 .post('/api/products')
                 .set('Authorization', `Bearer ${token}`)
                 .send(productData)
                 .expect(201);
 
-            productId = productResponse.body.productId || productResponse.body.id;
+            productId = productResponse.body.data;
         });
 
         it('should add item to cart', async () => {
             const response = await request(app)
-                .post('/api/cart/add')
+                .post('/api/cart/items')
                 .set('Authorization', `Bearer ${token}`)
                 .send({
                     productId,
@@ -168,7 +225,7 @@ describe('Order Placement Flow - Integration Test', () => {
         it('should update cart item quantity', async () => {
             // Add item
             await request(app)
-                .post('/api/cart/add')
+                .post('/api/cart/items')
                 .set('Authorization', `Bearer ${token}`)
                 .send({
                     productId,
@@ -178,7 +235,7 @@ describe('Order Placement Flow - Integration Test', () => {
 
             // Update quantity
             const response = await request(app)
-                .put('/api/cart/update')
+                .patch('/api/cart/items')
                 .set('Authorization', `Bearer ${token}`)
                 .send({
                     productId,
@@ -192,7 +249,7 @@ describe('Order Placement Flow - Integration Test', () => {
         it('should remove item from cart', async () => {
             // Add item
             await request(app)
-                .post('/api/cart/add')
+                .post('/api/cart/items')
                 .set('Authorization', `Bearer ${token}`)
                 .send({
                     productId,
@@ -202,7 +259,7 @@ describe('Order Placement Flow - Integration Test', () => {
 
             // Remove item
             await request(app)
-                .delete(`/api/cart/remove/${productId}`)
+                .delete(`/api/cart/items/${productId}`)
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200);
 
@@ -212,13 +269,13 @@ describe('Order Placement Flow - Integration Test', () => {
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200);
 
-            expect(cartResponse.body.items).toHaveLength(0);
+            expect(cartResponse.body.data.items).toHaveLength(0);
         });
 
         it('should clear entire cart', async () => {
             // Add multiple items
             await request(app)
-                .post('/api/cart/add')
+                .post('/api/cart/items')
                 .set('Authorization', `Bearer ${token}`)
                 .send({
                     productId,
@@ -228,7 +285,7 @@ describe('Order Placement Flow - Integration Test', () => {
 
             // Clear cart
             await request(app)
-                .delete('/api/cart/clear')
+                .delete('/api/cart')
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200);
 
@@ -238,7 +295,7 @@ describe('Order Placement Flow - Integration Test', () => {
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200);
 
-            expect(cartResponse.body.items).toHaveLength(0);
+            expect(cartResponse.body.data.items).toHaveLength(0);
         });
     });
 });

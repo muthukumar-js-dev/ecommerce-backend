@@ -27,7 +27,7 @@ export function createEventMetadata(
         aggregateType: extractAggregateType(event),
         correlationId: correlationId || event.eventId,
         causationId: causationId,
-        userId: (event.payload as any).userId,
+        userId: (event.payload).userId,
         timestamp: new Date().toISOString(),
         version: event.version,
     };
@@ -54,7 +54,7 @@ export function metadataToHeaders(metadata: EventMetadata): Record<string, strin
  * Extract aggregate ID from event payload
  */
 function extractAggregateId(event: DomainEvent<any>): string {
-    const payload = event.payload as any;
+    const payload = event.payload;
     return (
         payload.userId ||
         payload.orderId ||
@@ -70,9 +70,9 @@ function extractAggregateId(event: DomainEvent<any>): string {
  */
 function extractAggregateType(event: DomainEvent<any>): string {
     const eventName = event.eventName;
-    if (eventName.includes('User')) return 'User';
-    if (eventName.includes('Order')) return 'Order';
-    if (eventName.includes('Product')) return 'Product';
-    if (eventName.includes('Payment')) return 'Payment';
+    if (eventName.includes('User')) {return 'User';}
+    if (eventName.includes('Order')) {return 'Order';}
+    if (eventName.includes('Product')) {return 'Product';}
+    if (eventName.includes('Payment')) {return 'Payment';}
     return 'Unknown';
 }

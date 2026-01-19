@@ -11,12 +11,16 @@ export class OrderReadRepository {
 
     async save(data: Partial<IOrderReadModel>): Promise<void> {
         const orderId = data.orderId;
-        if (!orderId) throw new Error('Cannot save OrderReadModel without orderId');
+        if (!orderId) { throw new Error('Cannot save OrderReadModel without orderId'); }
 
         await OrderReadModel.findOneAndUpdate(
             { orderId },
             data,
             { upsert: true, new: true }
         ).exec();
+    }
+
+    async create(data: IOrderReadModel): Promise<void> {
+        return this.save(data);
     }
 }

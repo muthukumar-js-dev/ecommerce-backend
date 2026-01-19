@@ -18,6 +18,20 @@ dist
 coverage
 .nyc_output
 
+# Test outputs and debug files
+*_test*.txt
+*_output*.txt
+*_debug*.txt
+*_error*.txt
+*_check*.txt
+*_report*.txt
+test_*.txt
+coverage_*.txt
+eslint*.json
+*_lint*.json
+*_lint*.log
+analysis-output.txt
+
 # OS
 .DS_Store
 Thumbs.db

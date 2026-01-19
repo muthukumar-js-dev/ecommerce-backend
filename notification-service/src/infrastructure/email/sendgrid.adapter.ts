@@ -1,6 +1,6 @@
 import sgMail from '@sendgrid/mail';
 import { IEmailService, EmailMessage } from '@application/ports/email.port';
-import { AsyncResult, success, failure } from '@shared/types/result';
+import { AsyncResult, success, failure, isSuccess } from '@shared/types/result';
 import { ExternalServiceError } from '@shared/errors/external-service.error';
 
 /**
@@ -37,23 +37,18 @@ export class SendGridAdapter implements IEmailService {
 
     async sendBulk(messages: EmailMessage[]): AsyncResult<{ messageIds: string[] }> {
         try {
-            const msgs = messages.map((message) => ({
-                to: message.to,
-                from: message.from || this.fromEmail,
-                subject: message.subject,
-                html: message.body,
-                text: this.stripHtml(message.body),
-            }));
+            const results = await Promise.all(messages.map(msg => this.send(msg)));
+            const messageIds: string[] = [];
 
-            const responses = await sgMail.send(msgs);
-
-            const messageIds = responses.map(
-                (r) => r[0].headers['x-message-id'] || 'unknown'
-            );
+            for (const result of results) {
+                if (isSuccess(result)) {
+                    messageIds.push(result.data.messageId);
+                }
+            }
 
             return success({ messageIds });
         } catch (error: any) {
-            console.error('SendGrid bulk error:', error.response?.body || error.message);
+            console.error('SendGrid bulk error:', error.message);
             return failure(
                 new ExternalServiceError('SendGrid', 'Failed to send bulk emails', error)
             );

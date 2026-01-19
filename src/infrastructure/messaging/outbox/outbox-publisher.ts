@@ -1,7 +1,7 @@
 import { OutboxRepository } from '../../database/mongodb/repositories/outbox.repository';
 import { KafkaProducer } from '../kafka/kafka-producer';
 import { KafkaTopic } from '../kafka/topics';
-import { createEventMetadata, metadataToHeaders } from '../kafka/event-metadata';
+import { metadataToHeaders } from '../kafka/event-metadata';
 
 export interface OutboxPublisherConfig {
     pollingIntervalMs?: number;
@@ -64,17 +64,23 @@ export class OutboxPublisher {
      * Poll for unpublished events
      */
     private poll(): void {
-        if (!this.isRunning) return;
+        if (!this.isRunning) { return; }
 
-        this.pollTimeout = setTimeout(async () => {
-            try {
-                await this.publishPendingEvents();
-            } catch (error) {
-                console.error('❌ Error in outbox publisher:', error);
-            }
+        this.pollTimeout = setTimeout(() => {
+            if (!this.isRunning) { return; } // Double check inside timeout
 
-            // Continue polling
-            this.poll();
+            void (async () => {
+                try {
+                    await this.publishPendingEvents();
+                } catch (error) {
+                    console.error('❌ Error in outbox publisher:', error);
+                }
+
+                // Continue polling
+                if (this.isRunning) {
+                    this.poll();
+                }
+            })();
         }, this.pollingIntervalMs);
     }
 

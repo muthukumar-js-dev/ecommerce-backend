@@ -31,6 +31,7 @@ describe('Review Controller Integration', () => {
       getWishlistService: jest.fn().mockReturnValue({}),
       getReviewService: jest.fn().mockReturnValue(mockReviewService),
       getNotificationService: jest.fn().mockReturnValue({}),
+      getCQRSModule: jest.fn().mockReturnValue({ eventBus: {} }),
     });
 
     app = createApp();

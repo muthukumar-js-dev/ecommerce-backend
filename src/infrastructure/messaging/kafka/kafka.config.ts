@@ -32,7 +32,7 @@ export function createKafkaClient(config: KafkaClientConfig): Kafka {
     }
 
     if (config.sasl) {
-        kafkaConfig.sasl = config.sasl;
+        kafkaConfig.sasl = config.sasl as any;
     }
 
     return new Kafka(kafkaConfig);

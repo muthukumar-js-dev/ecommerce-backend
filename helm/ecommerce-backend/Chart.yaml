@@ -1,0 +1,17 @@
+apiVersion: v2
+name: ecommerce-backend
+description: E-Commerce Backend Microservices with Event Sourcing and CQRS
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - ecommerce
+  - microservices
+  - nodejs
+  - event-sourcing
+  - cqrs
+  - kafka
+maintainers:
+  - name: Backend Team
+    email: backend@example.com
+dependencies: []

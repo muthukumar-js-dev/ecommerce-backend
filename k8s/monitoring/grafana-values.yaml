@@ -1,0 +1,123 @@
+# Custom Grafana values for standalone installation
+# Note: Grafana is included in kube-prometheus-stack
+# Use this file if installing Grafana separately
+
+# Grafana configuration
+replicas: 1
+
+image:
+  repository: grafana/grafana
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Admin credentials
+adminUser: admin
+adminPassword: admin  # CHANGE THIS IN PRODUCTION!
+
+# Persistence
+persistence:
+  enabled: true
+  storageClassName: ebs-gp3  # Use fast-ssd for local Kind
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+
+# Resources
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+# Service
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+# Ingress
+ingress:
+  enabled: false
+  ingressClassName: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: grafana.yourdomain.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: grafana-tls
+      hosts:
+        - grafana.yourdomain.com
+
+# Data sources
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
+        isDefault: true
+        access: proxy
+        editable: true
+
+# Dashboard providers
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+
+# Plugins to install
+plugins:
+  - grafana-piechart-panel
+  - grafana-clock-panel
+
+# SMTP / Email configuration
+smtp:
+  enabled: false
+  host: smtp.gmail.com:587
+  user: your-email@gmail.com
+  password: your-app-password
+  from_address: grafana@yourdomain.com
+  from_name: Grafana
+
+# Grafana.ini configuration
+grafana.ini:
+  server:
+    root_url: https://grafana.yourdomain.com
+  security:
+    admin_user: admin
+    admin_password: admin
+  auth.anonymous:
+    enabled: false
+  analytics:
+    check_for_updates: true
+  log:
+    mode: console
+    level: info
+
+# Environment variables
+env:
+  GF_INSTALL_PLUGINS: grafana-piechart-panel,grafana-clock-panel
+
+# Sidecar for automatic dashboard discovery
+sidecar:
+  dashboards:
+    enabled: true
+    label: grafana_dashboard
+    folder: /tmp/dashboards
+  datasources:
+    enabled: true
+    label: grafana_datasource

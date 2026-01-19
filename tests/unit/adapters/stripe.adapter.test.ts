@@ -37,7 +37,7 @@ describe('StripeAdapter', () => {
 
             expect(isSuccess(result)).toBe(true);
             if (isSuccess(result)) {
-                expect(result.value.customerId).toBe('cus_123');
+                expect(result.data.customerId).toBe('cus_123');
             }
         });
 
@@ -66,9 +66,9 @@ describe('StripeAdapter', () => {
 
             expect(isSuccess(result)).toBe(true);
             if (isSuccess(result)) {
-                expect(result.value.id).toBe('pi_123');
-                expect(result.value.amount.amount).toBe(100);
-                expect(result.value.status).toBe('pending');
+                expect(result.data.id).toBe('pi_123');
+                expect(result.data.amount.amount).toBe(100);
+                expect(result.data.status).toBe('pending');
             }
 
             expect(mockStripe.paymentIntents.create).toHaveBeenCalledWith({
@@ -94,7 +94,7 @@ describe('StripeAdapter', () => {
 
             expect(isSuccess(result)).toBe(true);
             if (isSuccess(result)) {
-                expect(result.value.status).toBe('succeeded');
+                expect(result.data.status).toBe('succeeded');
             }
         });
     });
@@ -120,7 +120,7 @@ describe('StripeAdapter', () => {
 
             expect(isSuccess(result)).toBe(true);
             if (isSuccess(result)) {
-                expect(result.value.refundId).toBe('re_123');
+                expect(result.data.refundId).toBe('re_123');
             }
 
             expect(mockStripe.refunds.create).toHaveBeenCalledWith({

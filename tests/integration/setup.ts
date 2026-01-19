@@ -1,8 +1,10 @@
 import { Application } from 'express';
 // Use relative path require for app to be safe
-const { createApp } = require('../../src/infrastructure/http/app');
+// App lazy loaded in setup
+// const { createApp } = require('../../src/infrastructure/http/app');
 // Import DB helper from source - use require to avoid import issues if any
 const { connectToTestDB, disconnectTestDB, clearTestDB } = require('../../src/shared/utils/test-db');
+import { getOutboxPublisherModule } from '../../src/infrastructure/outbox-publisher.module';
 
 let app: Application;
 
@@ -10,35 +12,31 @@ let app: Application;
  * Setup integration test environment
  * Connects to the Global Mongo Memory Server started by Jest Global Setup
  */
-export async function setupIntegrationTests(): Promise<Application> {
-  try {
-    let mongoUri = process.env.MONGO_URI;
-
-    // If not in env (worker process), try reading from file shared by global setup
-    if (!mongoUri) {
-      const fs = require('fs');
-      const path = require('path');
-      const uriPath = path.join(__dirname, '..', 'mongo-uri.json'); // Up one level to tests/ dir
-      if (fs.existsSync(uriPath)) {
-        const config = JSON.parse(fs.readFileSync(uriPath, 'utf8'));
-        mongoUri = config.mongoUri;
-        process.env.MONGO_URI = mongoUri;
+// Initialize collections to avoid "catalog changes" in transactions
+const mongoose = require('mongoose');
+// Ensure all models are registered (dependent on import order, but usually safe in integration tests)
+// We can also force load key models if needed, but assuming they are imported by test suites.
+if (mongoose.models) {
+  for (const modelName of Object.keys(mongoose.models)) {
+    try {
+      await mongoose.models[modelName].createCollection();
+    } catch (err: any) {
+      // Ignore if collection already exists or other minor issue
+      if (err.codeName !== 'NamespaceExists') {
+        console.warn(`Warning: Failed to create collection for ${modelName}:`, err.message);
       }
     }
-
-    if (!mongoUri) {
-      throw new Error('MONGO_URI not defined in environment or config file. Check global-setup.js');
-    }
-
-    // Connect Mongoose via helper
-    await connectToTestDB(mongoUri);
-
-    app = createApp();
-    return app;
-  } catch (error) {
-    console.error('Error in setupIntegrationTests:', error);
-    throw error;
   }
+}
+
+// Lazy load app to ensure env vars are set
+const { createApp } = require('../../src/infrastructure/http/app');
+app = createApp();
+return app;
+  } catch (error) {
+  console.error('Error in setupIntegrationTests:', error);
+  throw error;
+}
 }
 
 /**
@@ -46,6 +44,10 @@ export async function setupIntegrationTests(): Promise<Application> {
  * Disconnects mongoose but keeps Server running (Global Teardown handles it)
  */
 export async function teardownIntegrationTests(): Promise<void> {
+  // Stop background services
+  const outboxModule = getOutboxPublisherModule();
+  await outboxModule.stop();
+
   await disconnectTestDB();
 }
 
@@ -54,6 +56,7 @@ export async function teardownIntegrationTests(): Promise<void> {
  * Useful to run between tests
  */
 export async function clearDatabase(): Promise<void> {
+  console.log('[Setup] Clearing Database...');
   await clearTestDB();
 }
 
@@ -70,7 +73,7 @@ export function sleep(ms: number): Promise<void> {
 export function createTestUser() {
   return {
     name: 'Test User',
-    email: `test-${Date.now()}@example.com`,
+    email: `test-${Date.now()}-${Math.floor(Math.random() * 1000000000)}@example.com`,
     password: 'Password123!',
   };
 }
@@ -81,10 +84,16 @@ export function createTestUser() {
 export function createTestProduct() {
   return {
     title: `Test Product ${Date.now()}`,
-    description: 'Test product description',
-    price: 1000,
+    description: 'Test product description with at least 10 characters',
+    actualPrice: 1200,
+    sellingPrice: 1000,
     inventory: 100,
     category: 'Electronics',
+    brand: 'Test Brand',
+    sku: `SKU-${Date.now()}`,
+    pid: `PID-${Date.now()}`,
+    images: ['http://example.com/image.jpg'],
+    productDetails: []
   };
 }
 
@@ -93,13 +102,9 @@ export function createTestProduct() {
  */
 export function createTestOrder() {
   return {
-    shippingAddress: {
-      street: '123 Test St',
-      city: 'Test City',
-      state: 'TS',
-      postalCode: '12345',
-      country: 'Test Country',
-    },
-    paymentMethodId: 'pm_test_123',
+    // Note: Use a mock or existing ID appropriate for the test environment
+    // The use case expects shippingAddressId, not the full object
+    shippingAddressId: 'addr_test_123',
+    paymentMethod: 'card',
   };
 }

@@ -43,6 +43,7 @@ export function authMiddleware(
       role: decoded.role,
     };
 
+
     next();
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {

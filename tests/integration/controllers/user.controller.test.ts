@@ -17,10 +17,11 @@ describe('User Controller Integration', () => {
 
     // Setup mock service
     mockUserService = new UserService(
-      {} as any,
-      'test-secret'
+      {} as any, // CommandBus
+      {} as any, // QueryBus
+      {} as any  // EventBus
     ) as jest.Mocked<UserService>;
-    
+
     // Mock Container.getInstance() to return our mock service
     (Container.getInstance as jest.Mock).mockReturnValue({
       getUserService: jest.fn().mockReturnValue(mockUserService),
@@ -31,6 +32,7 @@ describe('User Controller Integration', () => {
       getWishlistService: jest.fn().mockReturnValue({}),
       getReviewService: jest.fn().mockReturnValue({}),
       getNotificationService: jest.fn().mockReturnValue({}),
+      getCQRSModule: jest.fn().mockReturnValue({ eventBus: {} }),
     });
 
     app = createApp();

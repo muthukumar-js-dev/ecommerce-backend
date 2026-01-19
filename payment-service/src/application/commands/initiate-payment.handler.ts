@@ -4,7 +4,7 @@ import { Payment } from '../../domain/payment.aggregate';
 import { Money } from '@shared/domain/product/value-objects/money.vo';
 import { IPaymentGateway } from '@shared/application/ports/payment-gateway.port';
 import { AsyncResult, success, failure } from '@shared/types/result';
-import { PaymentDTO } from '../dtos/payment.dto';
+
 import { randomUUID } from 'crypto';
 
 export interface InitiatePaymentResult {

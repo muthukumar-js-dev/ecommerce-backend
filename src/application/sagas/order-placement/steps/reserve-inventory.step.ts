@@ -15,15 +15,13 @@ export class ReserveInventoryStep implements SagaStep {
         const reservedItems: Array<{ productId: string; quantity: number }> = [];
 
         for (const item of items) {
-            const productResult = await this.productRepository.findById(item.productId);
-            if (!productResult.success || !productResult.data) {
+            const product = await this.productRepository.findById(item.productId);
+            if (!product) {
                 throw new Error(`Product not found: ${item.productId}`);
             }
 
-            const product = productResult.data;
-
             // Reserve inventory
-            product.reserveStock(item.quantity);
+            product.reserveInventory(item.quantity);
 
             const updateResult = await this.productRepository.update(product);
             if (!updateResult.success) {
@@ -39,19 +37,18 @@ export class ReserveInventoryStep implements SagaStep {
         }
 
         // Store reserved items for compensation
-        context.stepData.set('reservedItems', reservedItems);
+        context.stepData['reservedItems'] = reservedItems;
     }
 
     async compensate(context: SagaContext): Promise<void> {
-        const reservedItems = context.stepData.get('reservedItems') || [];
+        const reservedItems = context.stepData['reservedItems'] || [];
 
         console.log(`🔙 Releasing ${reservedItems.length} reserved items`);
 
         for (const item of reservedItems) {
             try {
-                const productResult = await this.productRepository.findById(item.productId);
-                if (productResult.success && productResult.data) {
-                    const product = productResult.data;
+                const product = await this.productRepository.findById(item.productId);
+                if (product) {
                     product.restockInventory(item.quantity);
                     await this.productRepository.update(product);
 

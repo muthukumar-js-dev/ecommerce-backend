@@ -31,19 +31,23 @@ export class PhoneNumber extends ValueObject<PhoneNumberProps> {
   }
 
   static fromString(fullNumber: string): PhoneNumber {
-    // Basic parsing: assume first 3 chars are country code if starts with +, else default to +91 or similar?
-    // Better: regex to separate.
-    // For now, let's just use a simple heuristic or require + prefix.
-    const match = fullNumber.match(/^(\+\d{1,3})(\d+)$/);
-    if (!match) {
-        // Fallback or throw?
-        // Let's assume input is just the number and default country code if not present,
-        // or treat whole thing as number if we can't parse.
-        // Actually, let's just take first 3 digits as code if > 12 digits?
-        // Let's stick to safe parsing only if + exists
-        throw new ValidationError('Invalid phone number format for parsing', []);
+    if (!fullNumber.startsWith('+')) {
+      throw new ValidationError('Invalid phone number format for parsing', []);
     }
-    return this.create(match[1]!, match[2]!);
+
+    const digits = fullNumber.substring(1).replace(/\D/g, '');
+
+    // Try to split country code (1-3 digits) and number
+    for (let i = 1; i <= 3; i++) {
+      const cc = '+' + digits.substring(0, i);
+      const num = digits.substring(i);
+      // let create validate exact length, but we filter here to match
+      if (num.length >= 10 && num.length <= 15) {
+        return this.create(cc, num);
+      }
+    }
+
+    throw new ValidationError('Invalid phone number format for parsing', []);
   }
 
   get fullNumber(): string {

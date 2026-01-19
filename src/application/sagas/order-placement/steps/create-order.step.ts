@@ -13,7 +13,7 @@ export class CreateOrderStep implements SagaStep {
 
     async execute(context: SagaContext): Promise<void> {
         const { userId, items, shippingAddress } = context.data;
-        const paymentId = context.stepData.get('paymentId');
+        const paymentId = context.stepData['paymentId'];
 
         console.log(`📦 Creating order for user ${userId}`);
 
@@ -35,20 +35,19 @@ export class CreateOrderStep implements SagaStep {
         }
 
         // Store order ID
-        context.stepData.set('orderId', order.id);
+        context.stepData['orderId'] = order.id;
 
         console.log(`✅ Order created: ${order.id}`);
     }
 
     async compensate(context: SagaContext): Promise<void> {
-        const orderId = context.stepData.get('orderId');
+        const orderId = context.stepData['orderId'];
 
         if (orderId) {
             console.log(`🔙 Cancelling order: ${orderId}`);
 
-            const orderResult = await this.orderRepository.findById(orderId);
-            if (orderResult.success && orderResult.data) {
-                const order = orderResult.data;
+            const order = await this.orderRepository.findById(orderId);
+            if (order) {
                 order.cancel('Saga compensation');
                 await this.orderRepository.update(order);
 

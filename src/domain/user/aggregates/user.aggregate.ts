@@ -1,12 +1,12 @@
-import { AggregateRoot } from '@shared/domain/aggregate-root';
-import { ID, UserRole, Timestamp } from '@shared/types/common';
+import { AggregateRoot } from '../../../shared/domain/aggregate-root';
+import { ID, UserRole, Timestamp } from '../../../shared/types/common';
 import { Email } from '../value-objects/email.vo';
 import { Password } from '../value-objects/password.vo';
 import { PhoneNumber } from '../value-objects/phone-number.vo';
 import { UserRegistered } from '../events/user-registered.event';
 import { UserLoggedIn } from '../events/user-logged-in.event';
 import { UserRoleChanged } from '../events/user-role-changed.event';
-import { BusinessRuleError } from '@shared/errors';
+import { BusinessRuleError } from '../../../shared/errors';
 
 export interface UserProps {
   name: string;
@@ -125,11 +125,31 @@ export class User extends AggregateRoot<UserProps> {
     return this.props.lastLogin;
   }
 
+  get stripeCustomerId(): string | undefined {
+    return this.props.stripeCustomerId;
+  }
+
+  get shopName(): string | undefined {
+    return this.props.shopName;
+  }
+
+  get shopAddress(): string | undefined {
+    return this.props.shopAddress;
+  }
+
+  get password(): Password {
+    return this.props.password;
+  }
+
+  get phoneNumber(): PhoneNumber | undefined {
+    return this.props.phoneNumber;
+  }
+
   // Business methods
   changeEmail(newEmail: Email): void {
-      this.props.email = newEmail;
-      this.props.updatedAt = new Date();
-      // Raise event? UserEmailChanged
+    this.props.email = newEmail;
+    this.props.updatedAt = new Date();
+    // Raise event? UserEmailChanged
   }
 
   async verifyPassword(plainPassword: string): Promise<boolean> {
@@ -178,11 +198,11 @@ export class User extends AggregateRoot<UserProps> {
     if (name && name.trim().length >= 2) {
       this.props.name = name;
     }
-    
+
     if (phoneNumber) {
       this.props.phoneNumber = phoneNumber;
     }
-    
+
     this.props.updatedAt = new Date();
   }
 

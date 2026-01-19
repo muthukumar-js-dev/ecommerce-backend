@@ -34,7 +34,7 @@ export class AddToCartUseCase {
     }
 
     // Check if product is in stock
-    const productProps = (product as any).props;
+    const productProps = (product).props;
     if (productProps.outOfStock) {
       return failure(new OutOfStockError(productProps.title));
     }

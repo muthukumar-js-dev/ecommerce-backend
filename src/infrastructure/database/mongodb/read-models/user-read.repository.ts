@@ -26,4 +26,8 @@ export class UserReadRepository implements IUserReadRepository {
       .limit(limit)
       .exec();
   }
+
+  async create(data: IUserReadModel): Promise<void> {
+    await UserReadModel.create(data);
+  }
 }

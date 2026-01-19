@@ -18,9 +18,10 @@ export class SagaController {
      */
     getSagaStatus = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { id } = req.params;
-
-            const saga = await this.sagaOrchestrator.getSagaStatus(id);
+            // Original: const { id } = req.params;
+            // Changed to use req.params.sagaId and added validation
+            if (!req.params.sagaId) {throw new Error('Saga ID is required');}
+            const saga = await this.sagaOrchestrator.getSagaStatus(req.params.sagaId);
 
             res.json({
                 success: true,
@@ -65,6 +66,7 @@ export class SagaController {
         try {
             const { id } = req.params;
 
+            if (!id) {throw new Error('Saga ID is required');}
             await this.sagaOrchestrator.retryFailedSaga(id);
 
             res.json({
@@ -83,7 +85,7 @@ export class SagaController {
      * GET /api/sagas/metrics
      * Get saga execution metrics
      */
-    getMetrics = async (req: Request, res: Response): Promise<void> => {
+    getMetrics = async (_req: Request, res: Response): Promise<void> => {
         try {
             const metrics = await this.sagaMonitor.getMetrics();
 
@@ -103,7 +105,7 @@ export class SagaController {
      * GET /api/sagas/stats
      * Get detailed saga statistics
      */
-    getDetailedStats = async (req: Request, res: Response): Promise<void> => {
+    getDetailedStats = async (_req: Request, res: Response): Promise<void> => {
         try {
             const stats = await this.sagaMonitor.getDetailedStats();
 

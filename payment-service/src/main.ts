@@ -160,8 +160,8 @@ async function bootstrap() {
             process.exit(0);
         };
 
-        process.on('SIGTERM', shutdown);
-        process.on('SIGINT', shutdown);
+        process.on('SIGTERM', () => { void shutdown(); });
+        process.on('SIGINT', () => { void shutdown(); });
     } catch (error) {
         console.error('❌ Failed to start payment service:', error);
         process.exit(1);
@@ -169,4 +169,4 @@ async function bootstrap() {
 }
 
 // Start the service
-bootstrap();
+void bootstrap();

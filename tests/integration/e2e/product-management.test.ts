@@ -21,7 +21,7 @@ describe('Product Management E2E Tests', () => {
     await clearDatabase();
 
     // Create admin user
-    const adminRes = await request(app)
+    await request(app)
       .post('/api/users/register')
       .send({
         name: 'Admin User',
@@ -151,7 +151,7 @@ describe('Product Management E2E Tests', () => {
     beforeEach(async () => {
       // Create multiple products
       for (let i = 1; i <= 5; i++) {
-        await request(app)
+        const res = await request(app)
           .post('/api/products')
           .set('Authorization', `Bearer ${adminToken}`)
           .send({
@@ -160,10 +160,9 @@ describe('Product Management E2E Tests', () => {
             description: `Description ${i}`,
             actualPrice: 1000 * i,
             sellingPrice: 800 * i,
-            currency: 'USD',
             category: i % 2 === 0 ? 'Electronics' : 'Clothing',
             brand: 'TestBrand',
-            images: [],
+            images: ['image.jpg'],
             sellerId: sellerId,
             subCategory: 'Test',
             outOfStock: false,

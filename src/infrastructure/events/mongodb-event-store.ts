@@ -70,15 +70,16 @@ export class MongoDBEventStore implements IEventStore {
         return docs.map((doc) => this.toDomainEvent(doc));
     }
 
-    async replay(_fromEventId?: ID): Promise<void> {
+    replay(_fromEventId?: ID): Promise<void> {
         // Implementation for event replay would go here
         console.log('Event replay not yet implemented');
+        return Promise.resolve();
     }
 
     private extractAggregateId(event: DomainEvent<any>): string | undefined {
         // Try to extract aggregate ID from common payload fields
         // This logic relies on consistency in payload naming conventions
-        const payload = event.payload as any;
+        const payload = event.payload;
         return payload.userId || payload.productId || payload.orderId || payload.id;
     }
 

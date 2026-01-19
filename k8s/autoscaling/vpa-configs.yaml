@@ -1,0 +1,76 @@
+# Vertical Pod Autoscaler Configurations
+
+---
+# VPA for Core Service
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: core-service-vpa
+  namespace: ecommerce-prod
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: core-service
+  updatePolicy:
+    updateMode: "Off"  # Recommendation mode only, no auto-updates
+  resourcePolicy:
+    containerPolicies:
+      - containerName: core-service
+        minAllowed:
+          cpu: 250m
+          memory: 256Mi
+        maxAllowed:
+          cpu: 2000m
+          memory: 2Gi
+        controlledResources: ["cpu", "memory"]
+
+---
+# VPA for Payment Service
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: payment-service-vpa
+  namespace: ecommerce-prod
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: payment-service
+  updatePolicy:
+    updateMode: "Off"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: payment-service
+        minAllowed:
+          cpu: 200m
+          memory: 256Mi
+        maxAllowed:
+          cpu: 1000m
+          memory: 1Gi
+        controlledResources: ["cpu", "memory"]
+
+---
+# VPA for Notification Service
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: notification-service-vpa
+  namespace: ecommerce-prod
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: notification-service
+  updatePolicy:
+    updateMode: "Off"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: notification-service
+        minAllowed:
+          cpu: 150m
+          memory: 128Mi
+        maxAllowed:
+          cpu: 800m
+          memory: 768Mi
+        controlledResources: ["cpu", "memory"]

@@ -1,0 +1,57 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: payment-service-hpa
+  namespace: ecommerce-prod
+  labels:
+    app: payment-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: payment-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    # CPU-based scaling (more conservative for payment service)
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+    
+    # Memory-based scaling
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 75
+  
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 600  # 10 minutes (longer for payment service)
+      policies:
+        # Scale down by at most 25% of current pods per minute
+        - type: Percent
+          value: 25
+          periodSeconds: 60
+        # Scale down by at most 1 pod per minute
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+      selectPolicy: Min
+    
+    scaleUp:
+      stabilizationWindowSeconds: 30  # Brief stabilization
+      policies:
+        # Scale up by at most 50% of current pods per 30 seconds
+        - type: Percent
+          value: 50
+          periodSeconds: 30
+        # Scale up by at most 2 pods per 30 seconds
+        - type: Pods
+          value: 2
+          periodSeconds: 30
+      selectPolicy: Max

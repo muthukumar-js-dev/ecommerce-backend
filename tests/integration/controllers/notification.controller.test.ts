@@ -31,6 +31,7 @@ describe('Notification Controller Integration', () => {
       getWishlistService: jest.fn().mockReturnValue({}),
       getReviewService: jest.fn().mockReturnValue({}),
       getNotificationService: jest.fn().mockReturnValue(mockNotificationService),
+      getCQRSModule: jest.fn().mockReturnValue({ eventBus: {} }),
     });
 
     app = createApp();

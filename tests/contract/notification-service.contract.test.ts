@@ -1,29 +1,26 @@
-import { Pact, Matchers } from '@pact-foundation/pact';
+import { PactV3, Matchers } from '@pact-foundation/pact';
 import path from 'path';
 import axios from 'axios';
 
-const { like, eachLike } = Matchers;
+const { like } = Matchers;
 
 describe('Notification Service Contract Tests', () => {
-    const provider = new Pact({
+    const provider = new PactV3({
         consumer: 'core-service',
         provider: 'notification-service',
         port: 8990,
-        log: path.resolve(process.cwd(), 'logs', 'pact.log'),
         dir: path.resolve(process.cwd(), 'pacts'),
         logLevel: 'info',
     });
 
-    beforeAll(() => provider.setup());
-    afterAll(() => provider.finalize());
-    afterEach(() => provider.verify());
+    // PactV3 handles lifecycle automatically via executeTest.
 
     describe('Send Email', () => {
         it('should send email successfully', async () => {
-            await provider.addInteraction({
-                state: 'user exists with valid email',
-                uponReceiving: 'a request to send email',
-                withRequest: {
+            await provider
+                .given('user exists with valid email')
+                .uponReceiving('a request to send email')
+                .withRequest({
                     method: 'POST',
                     path: '/api/notifications/email',
                     headers: {
@@ -39,8 +36,8 @@ describe('Notification Service Contract Tests', () => {
                             totalAmount: like(1000),
                         },
                     },
-                },
-                willRespondWith: {
+                })
+                .willRespondWith({
                     status: 200,
                     headers: {
                         'Content-Type': 'application/json',
@@ -50,47 +47,47 @@ describe('Notification Service Contract Tests', () => {
                         status: 'SENT',
                         channel: 'EMAIL',
                     },
-                },
-            });
+                })
+                .executeTest(async (mockServer) => {
+                    const response = await axios.post(
+                        `${mockServer.url}/api/notifications/email`,
+                        {
+                            to: 'user@example.com',
+                            subject: 'Order Confirmation',
+                            template: 'order-confirmation',
+                            data: {
+                                orderNumber: 'ORD-001',
+                                totalAmount: 1000,
+                            },
+                        },
+                        {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: 'Bearer token123',
+                            },
+                        }
+                    );
 
-            const response = await axios.post(
-                'http://localhost:8990/api/notifications/email',
-                {
-                    to: 'user@example.com',
-                    subject: 'Order Confirmation',
-                    template: 'order-confirmation',
-                    data: {
-                        orderNumber: 'ORD-001',
-                        totalAmount: 1000,
-                    },
-                },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: 'Bearer token123',
-                    },
-                }
-            );
-
-            expect(response.data.notificationId).toBeDefined();
-            expect(response.data.status).toBe('SENT');
-            expect(response.data.channel).toBe('EMAIL');
+                    expect(response.data.notificationId).toBeDefined();
+                    expect(response.data.status).toBe('SENT');
+                    expect(response.data.channel).toBe('EMAIL');
+                });
         });
     });
 
     describe('Get Notification Status', () => {
         it('should return notification status', async () => {
-            await provider.addInteraction({
-                state: 'notification exists',
-                uponReceiving: 'a request for notification status',
-                withRequest: {
+            await provider
+                .given('notification exists')
+                .uponReceiving('a request for notification status')
+                .withRequest({
                     method: 'GET',
                     path: '/api/notifications/notif-123',
                     headers: {
                         Authorization: like('Bearer token123'),
                     },
-                },
-                willRespondWith: {
+                })
+                .willRespondWith({
                     status: 200,
                     headers: {
                         'Content-Type': 'application/json',
@@ -101,18 +98,21 @@ describe('Notification Service Contract Tests', () => {
                         channel: 'EMAIL',
                         sentAt: like('2026-01-01T00:00:00Z'),
                     },
-                },
-            });
+                })
+                .executeTest(async (mockServer) => {
+                    const response = await axios.get(
+                        `${mockServer.url}/api/notifications/notif-123`,
+                        {
+                            headers: {
+                                Authorization: 'Bearer token123',
+                            },
+                        }
+                    );
 
-            const response = await axios.get('http://localhost:8990/api/notifications/notif-123', {
-                headers: {
-                    Authorization: 'Bearer token123',
-                },
-            });
-
-            expect(response.data.notificationId).toBe('notif-123');
-            expect(response.data.status).toBeDefined();
-            expect(response.data.channel).toBe('EMAIL');
+                    expect(response.data.notificationId).toBe('notif-123');
+                    expect(response.data.status).toBeDefined();
+                    expect(response.data.channel).toBe('EMAIL');
+                });
         });
     });
 });

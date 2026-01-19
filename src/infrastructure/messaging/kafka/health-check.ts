@@ -34,7 +34,7 @@ export class KafkaHealthCheck {
                 details: {
                     brokers: cluster.brokers.length,
                     clusterId: cluster.clusterId,
-                    controller: cluster.controller,
+                    controller: cluster.controller ?? undefined,
                 },
             };
         } catch (error: any) {

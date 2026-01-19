@@ -1,0 +1,180 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: production-alerts-advanced
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus
+spec:
+  groups:
+    - name: sla_alerts
+      interval: 30s
+      rules:
+        - alert: HighErrorRate
+          expr: |
+            (sum(rate(http_request_errors_total{namespace="ecommerce-prod"}[5m])) 
+            / sum(rate(http_requests_total{namespace="ecommerce-prod"}[5m]))) * 100 > 0.5
+          for: 2m
+          labels:
+            severity: critical
+            team: backend
+            category: availability
+          annotations:
+            summary: "High error rate detected"
+            description: "Error rate is {{ $value | humanizePercentage }} (threshold: 0.5%)"
+            runbook_url: "https://runbooks.yourdomain.com/high-error-rate"
+            dashboard_url: "https://grafana.yourdomain.com/d/production"
+
+        - alert: HighLatency
+          expr: |
+            histogram_quantile(0.95, 
+              rate(http_request_duration_seconds_bucket{namespace="ecommerce-prod"}[5m])
+            ) > 0.2
+          for: 5m
+          labels:
+            severity: warning
+            team: backend
+            category: performance
+          annotations:
+            summary: "High latency detected"
+            description: "P95 latency is {{ $value | humanizeDuration }} (threshold: 200ms)"
+            runbook_url: "https://runbooks.yourdomain.com/high-latency"
+
+        - alert: CriticalLatency
+          expr: |
+            histogram_quantile(0.95, 
+              rate(http_request_duration_seconds_bucket{namespace="ecommerce-prod"}[5m])
+            ) > 0.5
+          for: 2m
+          labels:
+            severity: critical
+            team: backend
+            category: performance
+          annotations:
+            summary: "CRITICAL: Very high latency detected"
+            description: "P95 latency is {{ $value | humanizeDuration }} (threshold: 500ms)"
+            runbook_url: "https://runbooks.yourdomain.com/critical-latency"
+
+        - alert: LowCacheHitRate
+          expr: |
+            (rate(redis_keyspace_hits_total[5m]) 
+            / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]))) * 100 < 70
+          for: 10m
+          labels:
+            severity: warning
+            team: backend
+            category: performance
+          annotations:
+            summary: "Low cache hit rate"
+            description: "Cache hit rate is {{ $value | humanizePercentage }} (threshold: 80%)"
+            runbook_url: "https://runbooks.yourdomain.com/low-cache-hit-rate"
+
+        - alert: PodCrashLooping
+          expr: |
+            rate(kube_pod_container_status_restarts_total{namespace="ecommerce-prod"}[15m]) > 0
+          for: 5m
+          labels:
+            severity: critical
+            team: devops
+            category: reliability
+          annotations:
+            summary: "Pod is crash looping"
+            description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is restarting frequently"
+            runbook_url: "https://runbooks.yourdomain.com/pod-crash-loop"
+
+        - alert: DatabaseSlowQueries
+          expr: |
+            histogram_quantile(0.95, 
+              rate(mongodb_query_duration_seconds_bucket[5m])
+            ) > 0.1
+          for: 10m
+          labels:
+            severity: warning
+            team: backend
+            category: performance
+          annotations:
+            summary: "Slow database queries detected"
+            description: "P95 query time is {{ $value | humanizeDuration }} (threshold: 100ms)"
+            runbook_url: "https://runbooks.yourdomain.com/slow-queries"
+
+        - alert: HighMemoryUsage
+          expr: |
+            (container_memory_usage_bytes{namespace="ecommerce-prod"} 
+            / container_spec_memory_limit_bytes{namespace="ecommerce-prod"}) * 100 > 85
+          for: 5m
+          labels:
+            severity: warning
+            team: devops
+            category: resources
+          annotations:
+            summary: "High memory usage"
+            description: "Pod {{ $labels.pod }} memory usage is {{ $value | humanizePercentage }}"
+            runbook_url: "https://runbooks.yourdomain.com/high-memory"
+
+        - alert: HighCPUUsage
+          expr: |
+            (rate(container_cpu_usage_seconds_total{namespace="ecommerce-prod"}[5m]) 
+            / container_spec_cpu_quota{namespace="ecommerce-prod"} 
+            * container_spec_cpu_period{namespace="ecommerce-prod"}) * 100 > 80
+          for: 5m
+          labels:
+            severity: warning
+            team: devops
+            category: resources
+          annotations:
+            summary: "High CPU usage"
+            description: "Pod {{ $labels.pod }} CPU usage is {{ $value | humanizePercentage }}"
+            runbook_url: "https://runbooks.yourdomain.com/high-cpu"
+
+        - alert: SLAViolation
+          expr: |
+            (1 - (sum(rate(http_request_errors_total{namespace="ecommerce-prod"}[30d])) 
+            / sum(rate(http_requests_total{namespace="ecommerce-prod"}[30d])))) * 100 < 99.99
+          for: 1h
+          labels:
+            severity: critical
+            team: leadership
+            category: sla
+          annotations:
+            summary: "SLA violation detected"
+            description: "30-day availability is {{ $value | humanizePercentage }} (target: 99.99%)"
+            runbook_url: "https://runbooks.yourdomain.com/sla-violation"
+
+        - alert: LowThroughput
+          expr: |
+            sum(rate(http_requests_total{namespace="ecommerce-prod"}[5m])) < 10000
+          for: 10m
+          labels:
+            severity: warning
+            team: backend
+            category: traffic
+          annotations:
+            summary: "Low traffic detected"
+            description: "Request rate is {{ $value }} RPS (expected: >10000 RPS)"
+            runbook_url: "https://runbooks.yourdomain.com/low-traffic"
+
+        - alert: DatabaseConnectionPoolExhausted
+          expr: |
+            mongodb_connections_current >= mongodb_connections_available * 0.9
+          for: 5m
+          labels:
+            severity: critical
+            team: backend
+            category: database
+          annotations:
+            summary: "Database connection pool nearly exhausted"
+            description: "{{ $value }} connections in use (90% of pool)"
+            runbook_url: "https://runbooks.yourdomain.com/db-connection-pool"
+
+        - alert: RedisMemoryHigh
+          expr: |
+            (redis_memory_used_bytes / redis_memory_max_bytes) * 100 > 80
+          for: 5m
+          labels:
+            severity: warning
+            team: backend
+            category: cache
+          annotations:
+            summary: "Redis memory usage high"
+            description: "Redis memory usage is {{ $value | humanizePercentage }}"
+            runbook_url: "https://runbooks.yourdomain.com/redis-memory"

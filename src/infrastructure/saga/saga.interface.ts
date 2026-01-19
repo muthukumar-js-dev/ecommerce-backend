@@ -17,7 +17,7 @@ export interface SagaStep {
 export interface SagaContext {
     sagaId: ID;
     data: Record<string, any>;
-    stepData: Map<string, any>;
+    stepData: Record<string, any>;
 }
 
 /**

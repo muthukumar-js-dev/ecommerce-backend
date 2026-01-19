@@ -1,0 +1,158 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elastalert-config
+  namespace: logging
+data:
+  config.yaml: |
+    rules_folder: /opt/elastalert/rules
+    run_every:
+      minutes: 1
+    buffer_time:
+      minutes: 15
+    es_host: elasticsearch-es-http.logging.svc
+    es_port: 9200
+    writeback_index: elastalert_status
+    alert_time_limit:
+      days: 2
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elastalert-rules
+  namespace: logging
+data:
+  high-error-rate.yaml: |
+    name: High Error Rate
+    type: frequency
+    index: logs-*
+    num_events: 50
+    timeframe:
+      minutes: 5
+    filter:
+      - term:
+          level: "error"
+    alert:
+      - slack:
+          slack_webhook_url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+          slack_channel_override: "#alerts"
+          slack_username_override: "ElastAlert"
+          slack_msg_color: "danger"
+          slack_title: "High Error Rate Detected"
+          slack_text: "More than 50 errors in the last 5 minutes"
+
+  security-anomaly.yaml: |
+    name: Security Anomaly Detected
+    type: any
+    index: logs-*
+    filter:
+      - query_string:
+          query: 'message:("SQL injection" OR "XSS attack" OR "unauthorized access" OR "authentication failed")'
+    alert:
+      - slack:
+          slack_webhook_url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+          slack_channel_override: "#security"
+          slack_username_override: "Security Alert"
+          slack_msg_color: "danger"
+          slack_title: "Security Anomaly Detected"
+      - pagerduty:
+          pagerduty_service_key: "YOUR_PAGERDUTY_KEY"
+          pagerduty_client_name: "ElastAlert"
+
+  slow-query.yaml: |
+    name: Slow Database Query
+    type: frequency
+    index: logs-*
+    num_events: 10
+    timeframe:
+      minutes: 5
+    filter:
+      - range:
+          duration:
+            gte: 1000
+      - term:
+          type: "database_query"
+    alert:
+      - slack:
+          slack_webhook_url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+          slack_channel_override: "#performance"
+          slack_username_override: "Performance Alert"
+          slack_msg_color: "warning"
+          slack_title: "Slow Database Queries Detected"
+          slack_text: "More than 10 queries took longer than 1 second"
+
+  application-crash.yaml: |
+    name: Application Crash
+    type: any
+    index: logs-*
+    filter:
+      - query_string:
+          query: 'level:"fatal" OR message:("SIGTERM" OR "SIGKILL" OR "uncaught exception")'
+    alert:
+      - slack:
+          slack_webhook_url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+          slack_channel_override: "#incidents"
+          slack_username_override: "Critical Alert"
+          slack_msg_color: "danger"
+          slack_title: "Application Crash Detected"
+      - pagerduty:
+          pagerduty_service_key: "YOUR_PAGERDUTY_KEY"
+
+  unusual-traffic-spike.yaml: |
+    name: Unusual Traffic Spike
+    type: spike
+    index: logs-*
+    threshold_ref: 2
+    threshold_cur: 2
+    spike_height: 3
+    spike_type: "up"
+    timeframe:
+      minutes: 10
+    filter:
+      - term:
+          type: "http_request"
+    alert:
+      - slack:
+          slack_webhook_url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+          slack_channel_override: "#alerts"
+          slack_msg_color: "warning"
+          slack_title: "Unusual Traffic Spike"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elastalert
+  namespace: logging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elastalert
+  template:
+    metadata:
+      labels:
+        app: elastalert
+    spec:
+      containers:
+        - name: elastalert
+          image: jertel/elastalert2:latest
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+          volumeMounts:
+            - name: config
+              mountPath: /opt/elastalert/config.yaml
+              subPath: config.yaml
+            - name: rules
+              mountPath: /opt/elastalert/rules
+      volumes:
+        - name: config
+          configMap:
+            name: elastalert-config
+        - name: rules
+          configMap:
+            name: elastalert-rules

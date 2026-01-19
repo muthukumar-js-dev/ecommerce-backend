@@ -1,5 +1,5 @@
 import { IPaymentRepository } from '../../../domain/repositories/payment.repository.interface';
-import { Payment, PaymentStatus } from '../../../domain/payment.aggregate';
+import { Payment } from '../../../domain/payment.aggregate';
 import { PaymentModel, IPaymentDocument } from '../schemas/payment.schema';
 import { Money } from '@shared/domain/product/value-objects/money.vo';
 import { ID } from '@shared/types/common';

@@ -14,7 +14,7 @@ export class PlaceOrderUseCase {
   constructor(
     private readonly orderRepository: any,
     private readonly cartRepository: ICartRepository
-  ) {}
+  ) { }
 
   /**
    * Execute the place order use case
@@ -28,7 +28,7 @@ export class PlaceOrderUseCase {
         ])
       );
     }
-    
+
     // Validate shipping address
     if (!dto.shippingAddressId) {
       return failure(
@@ -58,7 +58,7 @@ export class PlaceOrderUseCase {
     const orderItems = cartProps.items.map((item: any) => ({
       productId: item.productId,
       quantity: item.quantity,
-      status: OrderStatus.ORDERED,
+      status: OrderStatus.PENDING,
       orderedDate: new Date(),
       cancelOrder: false,
       returnProduct: false,
@@ -83,7 +83,7 @@ export class PlaceOrderUseCase {
 
     // Clear cart after successful order
     cart.clear();
-    await this.cartRepository.save(cart);
+    await this.cartRepository.update(cart);
 
     // Return response
     return success(this.toDTO(saveResult.data));

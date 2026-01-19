@@ -118,7 +118,7 @@ async function bootstrap() {
         });
 
         // Error handling
-        app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+        app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
             console.error('Unhandled error:', err);
             res.status(500).json({
                 error: 'Internal server error',
@@ -141,8 +141,8 @@ async function bootstrap() {
             process.exit(0);
         };
 
-        process.on('SIGTERM', shutdown);
-        process.on('SIGINT', shutdown);
+        process.on('SIGTERM', () => { void shutdown(); });
+        process.on('SIGINT', () => { void shutdown(); });
 
     } catch (error) {
         console.error('❌ Failed to start notification service:', error);
@@ -151,4 +151,4 @@ async function bootstrap() {
 }
 
 // Start the service
-bootstrap();
+void bootstrap();

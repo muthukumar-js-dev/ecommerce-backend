@@ -24,7 +24,7 @@ export abstract class BaseSaga {
         this.context = {
             sagaId,
             data,
-            stepData: new Map(),
+            stepData: {},
         };
 
         // Initialize saga state
@@ -74,6 +74,9 @@ export abstract class BaseSaga {
      */
     private async executeStep(stepIndex: number): Promise<void> {
         const step = this.steps[stepIndex];
+        if (!step) {
+            throw new Error(`Step at index ${stepIndex} not found`);
+        }
         const maxRetries = 3;
         let retryCount = 0;
 
@@ -142,7 +145,7 @@ export abstract class BaseSaga {
 
         for (const stepState of completedSteps) {
             const step = this.steps.find((s) => s.name === stepState.stepName);
-            if (!step) continue;
+            if (!step) { continue; }
 
             try {
                 console.log(`🔙 Compensating step ${step.name}`);

@@ -10,10 +10,10 @@ export abstract class BaseApplicationService {
     ) { }
 
     protected async executeCommand<TResult>(command: any): Promise<TResult> {
-        return this.commandBus.execute(command);
+        return this.commandBus.execute(command) as Promise<TResult>;
     }
 
     protected async executeQuery<TResult>(query: any): Promise<TResult> {
-        return this.queryBus.execute(query);
+        return this.queryBus.execute(query) as Promise<TResult>;
     }
 }

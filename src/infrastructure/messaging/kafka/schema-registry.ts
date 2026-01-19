@@ -20,7 +20,8 @@ export class SchemaRegistryClient {
     }
 
     async encode(subject: string, payload: any): Promise<Buffer> {
-        return this.registry.encode(subject, payload);
+        const id = await this.registry.getLatestSchemaId(subject);
+        return this.registry.encode(id, payload);
     }
 
     async decode(buffer: Buffer): Promise<any> {

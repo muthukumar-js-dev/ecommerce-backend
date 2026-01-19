@@ -78,7 +78,7 @@ const orderSchema = new Schema<IOrderDocument>(
         status: {
           type: String,
           enum: Object.values(OrderStatus),
-          default: OrderStatus.ORDERED,
+          default: OrderStatus.PENDING,
         },
         orderedDate: { type: Date, default: Date.now },
         shippedDate: { type: Date },

@@ -27,7 +27,7 @@ export class RetryHandler {
             console.error(`  ✗ Handler failed (retry ${retryCount}/${RetryHandler.MAX_RETRIES}):`, error.message);
 
             if (retryCount >= RetryHandler.MAX_RETRIES) {
-                console.error(`  ⚠ Max retries exceeded, sending to DLQ`);
+                console.warn(`  ⚠ Max retries exceeded, sending to DLQ. Error: ${error.message}`);
                 await this.sendToDLQ(payload, error);
                 return; // Don't throw, message is handled
             }
@@ -68,7 +68,7 @@ export class RetryHandler {
             }
         );
 
-        console.log(`  ✓ Message sent to DLQ: ${payload.message.key}`);
+        console.log(`  ✓ Message sent to DLQ: ${payload.message.key?.toString() ?? 'unknown'}`);
     }
 
     /**

@@ -1,0 +1,76 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: resource-cleanup
+  namespace: ecommerce-prod
+  labels:
+    app: resource-cleanup
+    purpose: cost-optimization
+spec:
+  schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: resource-cleanup
+        spec:
+          serviceAccountName: resource-cleanup-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: cleanup
+              image: ecommerce/resource-cleanup:latest
+              env:
+                - name: AWS_REGION
+                  value: "ap-south-1"
+                - name: BACKUP_BUCKET
+                  value: "ecommerce-backups"
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: aws-credentials
+                      key: access-key-id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: aws-credentials
+                      key: secret-access-key
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  cpu: 200m
+                  memory: 256Mi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: resource-cleanup-sa
+  namespace: ecommerce-prod
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: resource-cleanup-role
+  namespace: ecommerce-prod
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "persistentvolumeclaims"]
+    verbs: ["list", "get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: resource-cleanup-rolebinding
+  namespace: ecommerce-prod
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: resource-cleanup-role
+subjects:
+  - kind: ServiceAccount
+    name: resource-cleanup-sa
+    namespace: ecommerce-prod

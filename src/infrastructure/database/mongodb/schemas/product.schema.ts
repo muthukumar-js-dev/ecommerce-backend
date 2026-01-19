@@ -16,6 +16,7 @@ export interface IProductDocument extends Document {
   average_rating: number;
   discount: number;
   out_of_stock: boolean;
+  inventory: number;
   images: string[];
   product_details: Array<{ key: string; value: string }>;
   seller: string;
@@ -90,6 +91,11 @@ const productSchema = new Schema<IProductDocument>(
       type: Boolean,
       required: true,
       default: false,
+    },
+    inventory: {
+      type: Number,
+      required: true,
+      default: 0,
     },
     images: {
       type: [String],

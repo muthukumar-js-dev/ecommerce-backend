@@ -26,6 +26,7 @@ import { tracingMiddleware } from '@infrastructure/tracing/tracing.middleware';
 import { PrometheusMetrics } from '@infrastructure/metrics/prometheus-metrics';
 import { metricsMiddleware } from '@infrastructure/metrics/metrics.middleware';
 import { createLogger, loggingMiddleware } from '@infrastructure/logging/logger';
+import { createHealthRoute } from '@infrastructure/health/health-check';
 
 import { setupSwagger } from './swagger';
 
@@ -68,7 +69,6 @@ export function createApp(): Application {
   setupSwagger(app);
 
   // Health check endpoints
-  const { createHealthRoute } = require('./health/health-check');
   app.use(createHealthRoute());
 
   // Initialize controllers
@@ -92,7 +92,7 @@ export function createApp(): Application {
   app.use('/api/notifications', createNotificationRoutes(notificationController));
 
   // Metrics endpoint
-  app.get('/metrics', async (req, res) => {
+  app.get('/metrics', async (_req, res) => {
     res.set('Content-Type', 'text/plain');
     res.send(await metrics.getMetrics());
   });

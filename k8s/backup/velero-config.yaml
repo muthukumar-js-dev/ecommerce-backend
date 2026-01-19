@@ -1,0 +1,91 @@
+# Velero Backup Configuration for Kubernetes
+
+---
+# Velero Backup Schedule - Daily Full Backup
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: daily-full-backup
+  namespace: velero
+spec:
+  schedule: "0 1 * * *"  # Daily at 1 AM
+  template:
+    includedNamespaces:
+      - ecommerce-prod
+      - monitoring
+      - vault
+    excludedResources:
+      - events
+      - events.events.k8s.io
+    storageLocation: default
+    volumeSnapshotLocations:
+      - default
+    ttl: 720h  # 30 days
+
+---
+# Velero Backup Schedule - Hourly Incremental
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: hourly-incremental-backup
+  namespace: velero
+spec:
+  schedule: "0 * * * *"  # Every hour
+  template:
+    includedNamespaces:
+      - ecommerce-prod
+    includedResources:
+      - configmaps
+      - secrets
+      - persistentvolumeclaims
+    storageLocation: default
+    ttl: 168h  # 7 days
+
+---
+# Velero Backup Storage Location (S3)
+apiVersion: velero.io/v1
+kind: BackupStorageLocation
+metadata:
+  name: default
+  namespace: velero
+spec:
+  provider: aws
+  objectStorage:
+    bucket: ecommerce-velero-backups
+    prefix: kubernetes
+  config:
+    region: ap-south-1
+    s3ForcePathStyle: "false"
+    serverSideEncryption: AES256
+
+---
+# Velero Volume Snapshot Location (EBS)
+apiVersion: velero.io/v1
+kind: VolumeSnapshotLocation
+metadata:
+  name: default
+  namespace: velero
+spec:
+  provider: aws
+  config:
+    region: ap-south-1
+
+---
+# Velero Backup - On-Demand Full Backup
+apiVersion: velero.io/v1
+kind: Backup
+metadata:
+  name: manual-full-backup
+  namespace: velero
+spec:
+  includedNamespaces:
+    - ecommerce-prod
+    - monitoring
+    - vault
+    - ingress-nginx
+  storageLocation: default
+  volumeSnapshotLocations:
+    - default
+  ttl: 2160h  # 90 days
+  snapshotVolumes: true
+  includeClusterResources: true

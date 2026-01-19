@@ -6,6 +6,7 @@ import { AddressRepository } from '@infrastructure/database/mongodb/repositories
 import { WishlistRepository } from '@infrastructure/database/mongodb/repositories/wishlist.repository';
 import { ReviewRepository } from '@infrastructure/database/mongodb/repositories/review.repository';
 import { NotificationRepository } from '@infrastructure/database/mongodb/repositories/notification.repository';
+import { OutboxRepository } from '@infrastructure/database/mongodb/repositories/outbox.repository';
 import { UserService } from '@application/services/user.service';
 import { ProductService } from '@application/services/product.service';
 import { CartService } from '@application/services/cart.service';
@@ -61,10 +62,11 @@ export class Container {
 
   private constructor() {
     // Initialize repositories
-    this.userRepository = new UserRepository();
-    this.productRepository = new ProductRepository();
+    const outboxRepository = new OutboxRepository();
+    this.userRepository = new UserRepository(outboxRepository);
+    this.productRepository = new ProductRepository(outboxRepository);
     this.cartRepository = new CartRepository();
-    this.orderRepository = new OrderRepository();
+    this.orderRepository = new OrderRepository(outboxRepository);
     this.addressRepository = new AddressRepository();
     this.wishlistRepository = new WishlistRepository();
     this.reviewRepository = new ReviewRepository();

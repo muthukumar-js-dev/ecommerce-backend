@@ -19,8 +19,8 @@ interface OrderStatusProps {
 export class OrderStatus extends ValueObject<OrderStatusProps> {
   private static readonly VALID_TRANSITIONS: Record<OrderStatusEnum, OrderStatusEnum[]> = {
     [OrderStatusEnum.PENDING]: [OrderStatusEnum.CONFIRMED, OrderStatusEnum.CANCELLED],
-    [OrderStatusEnum.CONFIRMED]: [OrderStatusEnum.PAID, OrderStatusEnum.CANCELLED],
-    [OrderStatusEnum.PAID]: [OrderStatusEnum.PROCESSING, OrderStatusEnum.CANCELLED],
+    [OrderStatusEnum.CONFIRMED]: [OrderStatusEnum.PAID, OrderStatusEnum.SHIPPED, OrderStatusEnum.CANCELLED],
+    [OrderStatusEnum.PAID]: [OrderStatusEnum.PROCESSING, OrderStatusEnum.SHIPPED, OrderStatusEnum.CANCELLED],
     [OrderStatusEnum.PROCESSING]: [OrderStatusEnum.SHIPPED, OrderStatusEnum.CANCELLED],
     [OrderStatusEnum.SHIPPED]: [OrderStatusEnum.DELIVERED, OrderStatusEnum.RETURNED],
     [OrderStatusEnum.DELIVERED]: [OrderStatusEnum.RETURNED],

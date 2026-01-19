@@ -45,14 +45,14 @@ export class RegisterUserHandler implements CommandHandler<RegisterUserCommand, 
         // Validate
         user.validate();
 
+        // Publish domain events BEFORE saving (repository will clear them)
+        await this.publishEvents(user);
+
         // Persist
         const saveResult = await this.userRepository.save(user);
         if (!saveResult.success) {
             return failure(saveResult.error);
         }
-
-        // Publish domain events
-        await this.publishEvents(user);
 
         return success({
             userId: user.id,
@@ -62,12 +62,13 @@ export class RegisterUserHandler implements CommandHandler<RegisterUserCommand, 
     }
 
     private async publishEvents(user: User): Promise<void> {
-        if (!user.domainEvents) return;
+        if (!user.domainEvents) { return; }
 
         for (const event of user.domainEvents) {
             await this.eventBus.publish(event);
         }
-        user.clearDomainEvents();
+        // Do NOT clear events here! Repository needs them for Outbox pattern.
+        // user.clearDomainEvents();
     }
 
     private generateId(): ID {

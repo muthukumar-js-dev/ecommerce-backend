@@ -9,7 +9,7 @@ import { APP_CONSTANTS } from '@shared/constants';
  * Use case for updating cart item quantity
  */
 export class UpdateCartItemQuantityUseCase {
-  constructor(private readonly cartRepository: ICartRepository) {}
+  constructor(private readonly cartRepository: ICartRepository) { }
 
   async execute(userId: ID, dto: UpdateCartItemRequestDTO): AsyncResult<void> {
     const validationResult = this.validate(dto);
@@ -24,7 +24,7 @@ export class UpdateCartItemQuantityUseCase {
 
     cart.updateQuantity(dto.productId, dto.quantity);
 
-    const saveResult = await this.cartRepository.save(cart);
+    const saveResult = await this.cartRepository.update(cart);
     if (!saveResult.success) {
       return failure(saveResult.error);
     }

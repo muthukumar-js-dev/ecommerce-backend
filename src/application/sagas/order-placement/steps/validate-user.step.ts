@@ -13,12 +13,10 @@ export class ValidateUserStep implements SagaStep {
     async execute(context: SagaContext): Promise<void> {
         const { userId } = context.data;
 
-        const userResult = await this.userRepository.findById(userId);
-        if (!userResult.success || !userResult.data) {
+        const user = await this.userRepository.findById(userId);
+        if (!user) {
             throw new Error(`User not found: ${userId}`);
         }
-
-        const user = userResult.data;
 
         // Check if user can place orders (e.g., not banned, email verified)
         if (!user.isActive) {
@@ -26,13 +24,14 @@ export class ValidateUserStep implements SagaStep {
         }
 
         // Store user in context for later steps
-        context.stepData.set('user', user);
+        context.stepData['user'] = user;
 
         console.log(`✅ User ${userId} validated successfully`);
     }
 
-    async compensate(context: SagaContext): Promise<void> {
+    compensate(_context: SagaContext): Promise<void> {
         // No compensation needed for validation
         console.log('ℹ️ ValidateUser: No compensation required');
+        return Promise.resolve();
     }
 }

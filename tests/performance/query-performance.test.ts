@@ -35,6 +35,10 @@ describe('Query Performance Tests', () => {
         const p95Index = Math.floor(durations.length * 0.95);
         const p95Duration = durations[p95Index];
 
+        if (p95Duration === undefined) {
+            throw new Error('Could not calculate P95 duration');
+        }
+
         console.log(`User Profile Query P95: ${p95Duration.toFixed(2)}ms`);
         expect(p95Duration).toBeLessThan(100);
     });
@@ -58,7 +62,7 @@ describe('Query Performance Tests', () => {
         for (let i = 0; i < 20; i++) {
             const start = performance.now();
 
-            const query = new ListProductsQuery({ page: 1, limit: 20 });
+            const query = new ListProductsQuery(0, 20);
             await cqrsModule.queryBus.execute(query);
 
             const duration = performance.now() - start;
@@ -68,6 +72,10 @@ describe('Query Performance Tests', () => {
         durations.sort((a, b) => a - b);
         const p95Index = Math.floor(durations.length * 0.95);
         const p95Duration = durations[p95Index];
+
+        if (p95Duration === undefined) {
+            throw new Error('Could not calculate P95 duration');
+        }
 
         console.log(`Product List Query P95: ${p95Duration.toFixed(2)}ms`);
         expect(p95Duration).toBeLessThan(150);

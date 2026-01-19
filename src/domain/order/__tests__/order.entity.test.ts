@@ -8,7 +8,7 @@ describe('Order Entity', () => {
       {
         productId: 'prod1',
         quantity: 2,
-        status: OrderStatus.ORDERED,
+        status: OrderStatus.PENDING,
         orderedDate: new Date(),
         cancelOrder: false,
         returnProduct: false,

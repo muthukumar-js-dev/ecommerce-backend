@@ -1,7 +1,11 @@
 import request from 'supertest';
-import { setupIntegrationTests, teardownIntegrationTests, clearDatabase, sleep, createTestUser, createTestProduct, createTestOrder } from './setup';
+import { setupIntegrationTests, teardownIntegrationTests, clearDatabase, createTestUser, createTestProduct } from './setup';
 import { Application } from 'express';
 import { OutboxModel } from '../../src/infrastructure/database/mongodb/models/outbox.model';
+import { UserModel } from '../../src/infrastructure/database/mongodb/schemas/user.schema';
+import { OutboxRepository } from '../../src/infrastructure/database/mongodb/repositories/outbox.repository';
+import { OutboxPublisher } from '../../src/infrastructure/messaging/outbox/outbox-publisher';
+import { KafkaProducer } from '../../src/infrastructure/messaging/kafka/kafka-producer';
 
 describe('Event Flow - Integration Test', () => {
     let app: Application;
@@ -35,36 +39,86 @@ describe('Event Flow - Integration Test', () => {
         it('should publish events to outbox on order placement', async () => {
             // Register user
             const userData = createTestUser();
+
             const registerResponse = await request(app)
                 .post('/api/users/register')
                 .send(userData)
                 .expect(201);
 
-            const token = registerResponse.body.token;
+            // Promote to ADMIN directly in DB to ensure permissions (User.create might enforce default role)
+            // Use response.body.data.userId based on confirmed structure
+            const userId = registerResponse.body.data.userId;
+            // Promote to ADMIN directly in DB to ensure permissions
+            // Use updateOne with correct schema field 'userRole'
+            await UserModel.updateOne({ _id: userId }, { userRole: 'admin' });
+
+            // NOTE: Registration does not return token in this implementation.
+            // We must login to get the token.
+            const loginResponse = await request(app)
+                .post('/api/users/login')
+                .send({
+                    email: userData.email,
+                    password: userData.password
+                })
+                .expect(200);
+
+            const authToken = loginResponse.body.data.token;
+
 
             // Create product
-            const productData = createTestProduct();
+            const productData = {
+                ...createTestProduct(),
+                sellerId: userId
+            };
             const productResponse = await request(app)
                 .post('/api/products')
-                .set('Authorization', `Bearer ${token}`)
+                .set('Authorization', `Bearer ${authToken}`)
                 .send(productData)
                 .expect(201);
 
-            const productId = productResponse.body.productId || productResponse.body.id;
+            let productId;
+            if (typeof productResponse.body.data === 'string') {
+                productId = productResponse.body.data;
+            } else {
+                productId = productResponse.body.data.id || productResponse.body.data._id || productResponse.body.data.productId;
+            }
+
+            if (!productId) {
+                console.error('Product Create Response:', JSON.stringify(productResponse.body, null, 2));
+                throw new Error('Failed to extract productId from response');
+            }
 
             // Add to cart
             await request(app)
-                .post('/api/cart/add')
-                .set('Authorization', `Bearer ${token}`)
+                .post('/api/cart/items')
+                .set('Authorization', `Bearer ${authToken}`)
                 .send({ productId, quantity: 2 })
                 .expect(200);
 
+            // Create address
+            const addressResponse = await request(app)
+                .post('/api/addresses')
+                .set('Authorization', `Bearer ${authToken}`)
+                .send({
+                    street: '123 Test St',
+                    city: 'Test City',
+                    state: 'TS',
+                    postalCode: '12345',
+                    country: 'Test Country',
+                    isDefault: true
+                })
+                .expect(201);
+
+            const addressId = addressResponse.body.data.id || addressResponse.body.data._id || addressResponse.body.data;
+
             // Place order
-            const orderData = createTestOrder();
             await request(app)
                 .post('/api/orders')
-                .set('Authorization', `Bearer ${token}`)
-                .send(orderData)
+                .set('Authorization', `Bearer ${authToken}`)
+                .send({
+                    shippingAddressId: addressId,
+                    paymentMethod: 'card'
+                })
                 .expect(201);
 
             // Check outbox for OrderPlaced event
@@ -82,8 +136,19 @@ describe('Event Flow - Integration Test', () => {
                 .send(userData)
                 .expect(201);
 
-            // Wait for outbox publisher to process
-            await sleep(3000);
+            // Manually process outbox
+            const kafkaProducerMock = {
+                connect: jest.fn().mockResolvedValue(undefined),
+                disconnect: jest.fn().mockResolvedValue(undefined),
+                send: jest.fn().mockResolvedValue([{}]),
+                isConnected: jest.fn().mockReturnValue(true)
+            } as unknown as KafkaProducer;
+
+            const outboxRepository = new OutboxRepository();
+            const publisher = new OutboxPublisher(outboxRepository, kafkaProducerMock);
+
+            // Trigger publishing manually (accessing private method via type assertion)
+            await (publisher as any).publishPendingEvents();
 
             // Check if events were published
             const publishedEvents = await OutboxModel.find({
@@ -104,8 +169,13 @@ describe('Event Flow - Integration Test', () => {
                 .expect(201);
 
             const outboxEvents = await OutboxModel.find({ eventType: 'UserRegistered' });
-            expect(outboxEvents[0].retryCount).toBeDefined();
-            expect(outboxEvents[0].retryCount).toBe(0);
+            if (outboxEvents[0]) {
+                expect(outboxEvents[0].retryCount).toBeDefined();
+                expect(outboxEvents[0].retryCount).toBe(0);
+            } else {
+                throw new Error('No outbox events found');
+            }
+
         });
     });
 
@@ -119,13 +189,13 @@ describe('Event Flow - Integration Test', () => {
                 .send(userData)
                 .expect(201);
 
-            expect(response.body.userId).toBeDefined();
+            expect(response.body.data.userId).toBeDefined();
 
             // Attempting to register with same email should fail
             await request(app)
                 .post('/api/users/register')
                 .send(userData)
-                .expect(400);
+                .expect(409);
         });
     });
 });

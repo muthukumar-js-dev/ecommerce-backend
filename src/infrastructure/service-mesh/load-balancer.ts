@@ -52,7 +52,10 @@ export class LoadBalancer {
      * Round Robin: Distribute evenly
      */
     private roundRobin(instances: ServiceInstance[]): ServiceInstance {
-        const instance = instances[this.currentIndex % instances.length];
+        if (instances.length === 0) {
+            throw new Error('No service instances available');
+        }
+        const instance = instances[this.currentIndex % instances.length]!;
         this.currentIndex++;
         return instance;
     }
@@ -61,8 +64,11 @@ export class LoadBalancer {
      * Least Connections: Route to least busy instance
      */
     private leastConnections(instances: ServiceInstance[]): ServiceInstance {
+        if (instances.length === 0) {
+            throw new Error('No service instances available');
+        }
         let minConnections = Infinity;
-        let selectedInstance = instances[0];
+        let selectedInstance = instances[0]!;
 
         for (const instance of instances) {
             const connections = this.connectionCounts.get(instance.id) || 0;
@@ -79,14 +85,20 @@ export class LoadBalancer {
      * Random: Random selection
      */
     private random(instances: ServiceInstance[]): ServiceInstance {
+        if (instances.length === 0) {
+            throw new Error('No service instances available');
+        }
         const index = Math.floor(Math.random() * instances.length);
-        return instances[index];
+        return instances[index]!;
     }
 
     /**
      * Weighted: Based on instance weights
      */
     private weighted(instances: ServiceInstance[]): ServiceInstance {
+        if (instances.length === 0) {
+            throw new Error('No service instances available');
+        }
         const weights = instances.map((instance) => {
             const weight = instance.meta?.weight ? parseInt(instance.meta.weight) : 1;
             return weight;
@@ -96,13 +108,13 @@ export class LoadBalancer {
         let random = Math.random() * totalWeight;
 
         for (let i = 0; i < instances.length; i++) {
-            random -= weights[i];
+            random -= weights[i]!;
             if (random <= 0) {
-                return instances[i];
+                return instances[i]!;
             }
         }
 
-        return instances[0];
+        return instances[0]!;
     }
 
     /**

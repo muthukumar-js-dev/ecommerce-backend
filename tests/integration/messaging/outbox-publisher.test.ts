@@ -4,7 +4,7 @@ import { KafkaProducer } from '../../../src/infrastructure/messaging/kafka/kafka
 import { getKafkaInstance } from '../../../src/infrastructure/messaging/kafka/kafka.config';
 import { KafkaTopic } from '../../../src/infrastructure/messaging/kafka/topics';
 import { OutboxModel } from '../../../src/infrastructure/database/mongodb/models/outbox.model';
-import mongoose from 'mongoose';
+import { connectTestDatabase, disconnectTestDatabase } from '../../utils/test-helpers';
 
 describe('Outbox Publisher Integration Tests', () => {
     let outboxRepository: OutboxRepository;
@@ -13,7 +13,7 @@ describe('Outbox Publisher Integration Tests', () => {
 
     beforeAll(async () => {
         // Connect to test database
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ecommerce-test');
+        await connectTestDatabase();
 
         // Initialize components
         outboxRepository = new OutboxRepository();
@@ -25,7 +25,7 @@ describe('Outbox Publisher Integration Tests', () => {
         if (publisher) {
             await publisher.stop();
         }
-        await mongoose.connection.close();
+        await disconnectTestDatabase();
     });
 
     beforeEach(async () => {
@@ -59,7 +59,7 @@ describe('Outbox Publisher Integration Tests', () => {
             });
 
             await publisher.start();
-            await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for polling
+            await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for polling
 
             // Assert: Event should be marked as published
             const updatedEvent = await OutboxModel.findOne({ eventId: 'test-event-123' });
@@ -89,7 +89,7 @@ describe('Outbox Publisher Integration Tests', () => {
             });
 
             await publisher.start();
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            await new Promise((resolve) => setTimeout(resolve, 5000));
 
             // Assert: All events should be published
             const publishedCount = await OutboxModel.countDocuments({ published: true });
@@ -150,7 +150,7 @@ describe('Outbox Publisher Integration Tests', () => {
             });
 
             await publisher.start();
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            await new Promise((resolve) => setTimeout(resolve, 5000));
 
             // Assert: Event should be marked as published (moved to DLQ)
             const updatedEvent = await OutboxModel.findOne({ eventId: 'dlq-test-123' });

@@ -25,7 +25,14 @@ describe('Notification System E2E Tests', () => {
         password: 'Password123!',
       });
 
-    userToken = userRes.body.data.token;
+    const loginRes = await request(app)
+      .post('/api/users/login')
+      .send({
+        email: 'user@test.com',
+        password: 'Password123!',
+      });
+
+    userToken = loginRes.body.data.token;
   });
 
   describe('Get Notifications', () => {

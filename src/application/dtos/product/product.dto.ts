@@ -15,6 +15,7 @@ export interface CreateProductRequestDTO {
   subCategory?: string;
   stripeId?: string;
   url?: string;
+  inventory?: number;
 }
 
 /**
@@ -44,6 +45,7 @@ export interface ProductResponseDTO {
   discount: number;
   brand: string;
   description: string;
+  inventory: number;
   outOfStock: boolean;
   images: string[];
   productDetails: Array<{ key: string; value: string }>;

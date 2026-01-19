@@ -16,12 +16,12 @@ interface UpdateUserProfileDTO {
  * Handles user profile updates
  */
 export class UpdateUserProfileUseCase {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(private readonly userRepository: IUserRepository) { }
 
   async execute(userId: ID, dto: UpdateUserProfileDTO): AsyncResult<void> {
     // Find user
     const user = await this.userRepository.findById(userId);
-    
+
     if (!user) {
       return failure(new NotFoundError('User', userId));
     }
@@ -33,29 +33,22 @@ export class UpdateUserProfileUseCase {
       if (existingUser) {
         return failure(new Error('Email already in use'));
       }
-      
+
       user.changeEmail(newEmail);
     }
 
-    // Update other profile details
     if (dto.name || dto.phone) {
       let phoneNumber: PhoneNumber | undefined;
       if (dto.phone) {
         // Assuming update provides formatted or full string?
         // Using fromString for flexibility
-        try {
-            if (dto.phone.startsWith('+')) {
-                 phoneNumber = PhoneNumber.fromString(dto.phone);
-            } else {
-                 phoneNumber = PhoneNumber.create('+91', dto.phone); // Default logic
-            }
-        } catch (e) {
-            // If invalid phone, ignore or throw?
-            // Throwing is better validation
-            throw e;
+        if (dto.phone.startsWith('+')) {
+          phoneNumber = PhoneNumber.fromString(dto.phone);
+        } else {
+          phoneNumber = PhoneNumber.create('+91', dto.phone); // Default logic
         }
       }
-      
+
       user.updateProfile(dto.name || user.name, phoneNumber);
     }
 

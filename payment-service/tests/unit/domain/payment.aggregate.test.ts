@@ -1,5 +1,5 @@
-import { Payment, PaymentStatus } from '../../../domain/payment.aggregate';
-import { Money } from '../../../../../src/domain/product/value-objects/money.vo';
+import { Payment, PaymentStatus } from '../../../src/domain/payment.aggregate';
+import { Money } from '../../../../src/domain/product/value-objects/money.vo';
 
 describe('Payment Aggregate', () => {
     describe('initiate', () => {
@@ -18,7 +18,7 @@ describe('Payment Aggregate', () => {
             expect(payment.amount).toEqual(amount);
             expect(payment.status).toBe(PaymentStatus.PENDING);
             expect(payment.domainEvents.length).toBe(1);
-            expect(payment.domainEvents[0].eventName).toBe('PaymentInitiated');
+            expect(payment.domainEvents[0]!.eventName).toBe('PaymentInitiated');
         });
     });
 
@@ -68,7 +68,7 @@ describe('Payment Aggregate', () => {
 
             expect(payment.status).toBe(PaymentStatus.CAPTURED);
             expect(payment.domainEvents.length).toBe(1);
-            expect(payment.domainEvents[0].eventName).toBe('PaymentSucceeded');
+            expect(payment.domainEvents[0]!.eventName).toBe('PaymentSucceeded');
         });
 
         it('should throw error when capturing non-authorized payment', () => {
@@ -100,7 +100,7 @@ describe('Payment Aggregate', () => {
             expect(payment.status).toBe(PaymentStatus.FAILED);
             expect(payment.failureReason).toBe('Insufficient funds');
             expect(payment.domainEvents.length).toBe(1);
-            expect(payment.domainEvents[0].eventName).toBe('PaymentFailed');
+            expect(payment.domainEvents[0]!.eventName).toBe('PaymentFailed');
         });
     });
 

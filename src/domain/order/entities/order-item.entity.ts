@@ -1,7 +1,7 @@
-import { Entity } from '@shared/domain/entity';
-import { ID, Timestamp } from '@shared/types/common';
-import { Money } from '@domain/product/value-objects/money.vo';
-import { Quantity } from '@domain/product/value-objects/quantity.vo';
+import { Entity } from '../../../shared/domain/entity';
+import { ID, Timestamp } from '../../../shared/types/common';
+import { Money } from '../../product/value-objects/money.vo';
+import { Quantity } from '../../product/value-objects/quantity.vo';
 import { OrderStatus, OrderStatusEnum } from '../value-objects/order-status.vo';
 
 export interface OrderItemProps {
@@ -102,5 +102,10 @@ export class OrderItem extends Entity<OrderItemProps> {
 
   canBeReturned(): boolean {
     return this.props.canReturn && this.props.status.isDelivered;
+  }
+
+  updateQuantity(quantity: Quantity): void {
+    this.props.quantity = quantity;
+    this.props.totalPrice = this.props.unitPrice.multiply(quantity.value);
   }
 }

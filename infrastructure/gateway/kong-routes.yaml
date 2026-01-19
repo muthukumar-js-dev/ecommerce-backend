@@ -1,0 +1,143 @@
+# Kong API Gateway Routes Configuration
+
+services:
+  - name: main-app
+    url: http://main-app:3000
+    routes:
+      - name: user-routes
+        paths:
+          - /api/users
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 100
+              hour: 10000
+              policy: local
+          - name: cors
+            config:
+              origins:
+                - "*"
+              methods:
+                - GET
+                - POST
+                - PUT
+                - DELETE
+                - OPTIONS
+              headers:
+                - Accept
+                - Authorization
+                - Content-Type
+              exposed_headers:
+                - X-Auth-Token
+              credentials: true
+              max_age: 3600
+
+      - name: product-routes
+        paths:
+          - /api/products
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 200
+              hour: 20000
+          - name: response-transformer
+            config:
+              add:
+                headers:
+                  - "X-Service:main-app"
+
+      - name: order-routes
+        paths:
+          - /api/orders
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 50
+              hour: 5000
+          - name: request-size-limiting
+            config:
+              allowed_payload_size: 10
+
+      - name: cart-routes
+        paths:
+          - /api/cart
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 150
+              hour: 15000
+
+  - name: payment-service
+    url: http://payment-service:3001
+    routes:
+      - name: payment-routes
+        paths:
+          - /api/payments
+        methods:
+          - GET
+          - POST
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 20
+              hour: 1000
+          - name: request-size-limiting
+            config:
+              allowed_payload_size: 5
+          - name: ip-restriction
+            config:
+              allow:
+                - 10.0.0.0/8
+                - 172.16.0.0/12
+                - 192.168.0.0/16
+
+  - name: notification-service
+    url: http://notification-service:3002
+    routes:
+      - name: notification-routes
+        paths:
+          - /api/notifications
+        methods:
+          - GET
+          - POST
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 100
+              hour: 10000
+
+# Global plugins
+plugins:
+  - name: prometheus
+    config:
+      per_consumer: true
+  
+  - name: request-id
+    config:
+      header_name: X-Request-ID
+      echo_downstream: true
+  
+  - name: correlation-id
+    config:
+      header_name: X-Correlation-ID
+      echo_downstream: true

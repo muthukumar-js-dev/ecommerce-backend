@@ -1,0 +1,142 @@
+config:
+  target: 'https://api.yourdomain.com'
+  phases:
+    # Phase 1: Warm-up
+    - duration: 300
+      arrivalRate: 100
+      name: 'Warm up - 100 RPS'
+    
+    # Phase 2: Gradual ramp to 1K RPS
+    - duration: 300
+      arrivalRate: 100
+      rampTo: 1000
+      name: 'Ramp to 1K RPS'
+    
+    # Phase 3: Sustained 1K RPS
+    - duration: 600
+      arrivalRate: 1000
+      name: 'Sustained 1K RPS - 10 minutes'
+    
+    # Phase 4: Ramp to 10K RPS
+    - duration: 600
+      arrivalRate: 1000
+      rampTo: 10000
+      name: 'Ramp to 10K RPS'
+    
+    # Phase 5: Sustained 10K RPS (simulating 10M users)
+    - duration: 1800
+      arrivalRate: 10000
+      name: 'Sustained 10K RPS - 30 minutes'
+    
+    # Phase 6: Peak load 50K RPS
+    - duration: 300
+      arrivalRate: 10000
+      rampTo: 50000
+      name: 'Ramp to peak - 50K RPS'
+    
+    # Phase 7: Sustained peak
+    - duration: 600
+      arrivalRate: 50000
+      name: 'Sustained peak - 50K RPS - 10 minutes'
+    
+    # Phase 8: Spike to 100K RPS
+    - duration: 120
+      arrivalRate: 50000
+      rampTo: 100000
+      name: 'Spike to 100K RPS'
+    
+    # Phase 9: Brief sustained 100K
+    - duration: 180
+      arrivalRate: 100000
+      name: 'Sustained 100K RPS - 3 minutes'
+    
+    # Phase 10: Ramp down
+    - duration: 300
+      arrivalRate: 100000
+      rampTo: 100
+      name: 'Ramp down'
+
+scenarios:
+  # Scenario 1: Product Browsing (50%)
+  - name: 'Product Browsing and Search'
+    weight: 50
+    flow:
+      - get:
+          url: '/api/products?page={{ $randomNumber(1, 100) }}&limit=20'
+      - think: 1
+      - get:
+          url: '/api/products/{{ $randomString() }}'
+      - think: 2
+      - get:
+          url: '/api/products/search?q={{ $randomString() }}&page=1&limit=20'
+      - get:
+          url: '/api/products/categories'
+      - think: 1
+      - get:
+          url: '/api/products?category={{ $randomString() }}&page=1&limit=20'
+  
+  # Scenario 2: Shopping Cart Operations (25%)
+  - name: 'Shopping Cart Management'
+    weight: 25
+    flow:
+      - get:
+          url: '/api/cart'
+      - post:
+          url: '/api/cart/add'
+          json:
+            productId: '{{ $randomString() }}'
+            quantity: '{{ $randomNumber(1, 5) }}'
+      - think: 1
+      - put:
+          url: '/api/cart/update'
+          json:
+            productId: '{{ $randomString() }}'
+            quantity: '{{ $randomNumber(1, 10) }}'
+      - get:
+          url: '/api/cart'
+  
+  # Scenario 3: Order Placement (15%)
+  - name: 'Complete Order Flow'
+    weight: 15
+    flow:
+      - post:
+          url: '/api/orders'
+          json:
+            items:
+              - productId: '{{ $randomString() }}'
+                quantity: 2
+                price: 1999
+            shippingAddress:
+              street: '123 Test Street'
+              city: 'Mumbai'
+              state: 'MH'
+              postalCode: '400001'
+              country: 'IN'
+            paymentMethodId: 'pm_test_{{ $randomString() }}'
+      - think: 2
+      - get:
+          url: '/api/orders'
+  
+  # Scenario 4: User Authentication (10%)
+  - name: 'User Authentication Flow'
+    weight: 10
+    flow:
+      - post:
+          url: '/api/users/register'
+          json:
+            name: '{{ $randomString() }}'
+            email: '{{ $randomEmail() }}@example.com'
+            password: 'Test@123456'
+      - think: 2
+      - post:
+          url: '/api/users/login'
+          json:
+            email: 'loadtest@example.com'
+            password: 'Test@123456'
+      - get:
+          url: '/api/users/profile'
+
+expect:
+  maxErrorRate: 5
+  p95: 500
+  p99: 1000

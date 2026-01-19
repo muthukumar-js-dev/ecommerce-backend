@@ -1,12 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": ["jest", "node", "express", "supertest"],
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "rootDir": ".",
+    "outDir": "./dist-test"
   },
-  "include": [
-    "src/**/*",
-    "tests/**/*"
-  ]
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

@@ -22,7 +22,12 @@ export interface OrderItemDTO {
  */
 export interface PlaceOrderRequestDTO {
   paymentMethod: PaymentMethod;
-  shippingAddressId?: string;
+  shippingAddressId: string;
+  items: {
+    productId: string;
+    quantity: number;
+    price: number;
+  }[];
 }
 
 /**

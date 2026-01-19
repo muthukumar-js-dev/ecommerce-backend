@@ -121,7 +121,7 @@ export class OutboxRepository {
      * Extract aggregate ID from event payload
      */
     private extractAggregateId(event: DomainEvent<any>): string {
-        const payload = event.payload as any;
+        const payload = event.payload;
         return (
             payload.userId ||
             payload.orderId ||
@@ -137,10 +137,10 @@ export class OutboxRepository {
      */
     private extractAggregateType(event: DomainEvent<any>): string {
         const eventName = event.eventName;
-        if (eventName.includes('User')) return 'User';
-        if (eventName.includes('Order')) return 'Order';
-        if (eventName.includes('Product')) return 'Product';
-        if (eventName.includes('Payment')) return 'Payment';
+        if (eventName.includes('User')) {return 'User';}
+        if (eventName.includes('Order')) {return 'Order';}
+        if (eventName.includes('Product')) {return 'Product';}
+        if (eventName.includes('Payment')) {return 'Payment';}
         return 'Unknown';
     }
 }

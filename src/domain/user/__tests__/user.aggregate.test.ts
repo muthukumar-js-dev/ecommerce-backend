@@ -27,7 +27,7 @@ describe('User Aggregate', () => {
       expect(user.id).toBe('123');
       expect(user.name).toBe('John Doe');
       expect(user.domainEvents).toHaveLength(1);
-      expect(user.domainEvents[0].eventName).toBe('UserRegistered');
+      expect(user.domainEvents[0]!.eventName).toBe('UserRegistered');
     });
 
     it('should initialize with zero order counts', () => {
@@ -52,7 +52,7 @@ describe('User Aggregate', () => {
       user.recordLogin('192.168.1.1', 'Mozilla/5.0');
 
       expect(user.domainEvents).toHaveLength(1);
-      expect(user.domainEvents[0].eventName).toBe('UserLoggedIn');
+      expect(user.domainEvents[0]!.eventName).toBe('UserLoggedIn');
     });
   });
 
@@ -70,7 +70,7 @@ describe('User Aggregate', () => {
       expect(user.role).toBe(UserRole.SELLER);
       expect(user.isSeller).toBe(true);
       expect(user.domainEvents).toHaveLength(1);
-      expect(user.domainEvents[0].eventName).toBe('UserRoleChanged');
+      expect(user.domainEvents[0]!.eventName).toBe('UserRoleChanged');
     });
 
     it('should throw error when changing to seller without shop details', () => {

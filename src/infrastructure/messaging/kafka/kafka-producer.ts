@@ -11,7 +11,7 @@ export class KafkaProducer {
     private producer: Producer;
     private connected: boolean = false;
 
-    constructor(private kafka: Kafka, config?: ProducerConfig) {
+    constructor(kafka: Kafka, config?: ProducerConfig) {
         this.producer = kafka.producer({
             allowAutoTopicCreation: false,
             transactionalId: config?.transactionalId || `ecommerce-producer-${process.pid}`,
@@ -24,7 +24,7 @@ export class KafkaProducer {
                 multiplier: 2,
                 factor: 0.2,
             },
-            compression: CompressionTypes.GZIP,
+
         });
     }
 
@@ -67,6 +67,7 @@ export class KafkaProducer {
                     timestamp: Date.now().toString(),
                 },
             ],
+            compression: CompressionTypes.GZIP,
         };
 
         try {
@@ -97,6 +98,7 @@ export class KafkaProducer {
                 headers: this.serializeHeaders(msg.headers),
                 timestamp: Date.now().toString(),
             })),
+            compression: CompressionTypes.GZIP,
         };
 
         try {
@@ -119,7 +121,7 @@ export class KafkaProducer {
      * Serialize headers to Buffer format required by Kafka
      */
     private serializeHeaders(headers?: Record<string, string>): Record<string, Buffer> | undefined {
-        if (!headers) return undefined;
+        if (!headers) { return undefined; }
 
         const serialized: Record<string, Buffer> = {};
         for (const [key, value] of Object.entries(headers)) {

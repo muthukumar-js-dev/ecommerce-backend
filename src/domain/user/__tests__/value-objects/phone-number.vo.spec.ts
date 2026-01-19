@@ -1,4 +1,4 @@
-import { PhoneNumber } from '../../../value-objects/phone-number.vo';
+import { PhoneNumber } from '../../value-objects/phone-number.vo';
 import { ValidationError } from '@shared/errors';
 
 describe('PhoneNumber Value Object', () => {
@@ -38,7 +38,7 @@ describe('PhoneNumber Value Object', () => {
 
     it('should throw on invalid format', () => {
       expect(() => PhoneNumber.fromString('invalid')).toThrow(ValidationError);
-      expect(() => PhoneNumber.fromString('12345')).toThrow(ValidationError); 
+      expect(() => PhoneNumber.fromString('12345')).toThrow(ValidationError);
     });
   });
 });

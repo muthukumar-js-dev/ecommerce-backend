@@ -20,7 +20,7 @@ describe('Product Controller Integration', () => {
     process.env.JWT_SECRET = 'test-secret';
     jest.clearAllMocks();
 
-    mockProductService = new ProductService({} as any) as jest.Mocked<ProductService>;
+    mockProductService = new ProductService({} as any, {} as any, {} as any) as jest.Mocked<ProductService>;
 
     (Container.getInstance as jest.Mock).mockReturnValue({
       getUserService: jest.fn().mockReturnValue({}),
@@ -31,6 +31,7 @@ describe('Product Controller Integration', () => {
       getWishlistService: jest.fn().mockReturnValue({}),
       getReviewService: jest.fn().mockReturnValue({}),
       getNotificationService: jest.fn().mockReturnValue({}),
+      getCQRSModule: jest.fn().mockReturnValue({ eventBus: {} }),
     });
 
     app = createApp();

@@ -7,7 +7,7 @@ export class UnitOfWork {
     constructor(private readonly eventBus: EventBus) { }
 
     registerAggregate(aggregate: AggregateRoot<any>): void {
-        if (!this.aggregates.find(agg => agg.id.value === aggregate.id.value)) {
+        if (!this.aggregates.find(agg => agg.id === aggregate.id)) {
             this.aggregates.push(aggregate);
         }
     }

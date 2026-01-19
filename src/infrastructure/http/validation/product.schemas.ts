@@ -23,6 +23,7 @@ export const createProductSchema = {
       )
       .optional(),
     sellerId: Joi.string().required(),
+    inventory: Joi.number().min(0).optional().default(0),
   }),
 };
 

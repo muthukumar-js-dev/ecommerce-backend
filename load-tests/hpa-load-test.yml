@@ -1,0 +1,88 @@
+config:
+  target: 'http://api.ecommerce.local'
+  phases:
+    # Phase 1: Baseline - establish normal load
+    - duration: 60
+      arrivalRate: 10
+      name: 'Baseline Load'
+    
+    # Phase 2: Ramp up - trigger HPA scale-up
+    - duration: 300
+      arrivalRate: 100
+      rampTo: 1000
+      name: 'Ramp Up - Trigger Scaling'
+    
+    # Phase 3: Sustained high load - verify scaled state
+    - duration: 300
+      arrivalRate: 1000
+      name: 'Sustained High Load'
+    
+    # Phase 4: Spike - test rapid scaling
+    - duration: 60
+      arrivalRate: 2000
+      name: 'Traffic Spike'
+    
+    # Phase 5: Ramp down - trigger HPA scale-down
+    - duration: 180
+      arrivalRate: 2000
+      rampTo: 10
+      name: 'Ramp Down - Trigger Scale Down'
+    
+    # Phase 6: Cool down - verify scale-down
+    - duration: 120
+      arrivalRate: 10
+      name: 'Cool Down'
+
+scenarios:
+  - name: 'Product Browsing'
+    weight: 40
+    flow:
+      - get:
+          url: '/api/products'
+          capture:
+            - json: '$.data[0].id'
+              as: 'productId'
+      - get:
+          url: '/api/products/{{ productId }}'
+      - think: 2
+
+  - name: 'Search Products'
+    weight: 30
+    flow:
+      - get:
+          url: '/api/products/search?q=laptop'
+      - think: 1
+
+  - name: 'Cart Operations'
+    weight: 20
+    flow:
+      - post:
+          url: '/api/cart/add'
+          json:
+            productId: 'product-123'
+            quantity: 1
+      - get:
+          url: '/api/cart'
+      - think: 3
+
+  - name: 'Order Creation'
+    weight: 10
+    flow:
+      - post:
+          url: '/api/orders'
+          json:
+            items:
+              - productId: 'product-123'
+                quantity: 1
+            shippingAddress:
+              street: '123 Main St'
+              city: 'San Francisco'
+              state: 'CA'
+              zip: '94102'
+      - think: 5
+
+# Performance expectations
+expect:
+  maxErrorRate: 5  # Max 5% error rate
+  p95: 500  # 95th percentile response time < 500ms
+  p99: 1000  # 99th percentile response time < 1000ms

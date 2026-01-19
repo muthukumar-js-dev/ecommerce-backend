@@ -1,4 +1,4 @@
-import { Notification, NotificationType, NotificationChannel, NotificationStatus } from '@domain/notification.entity';
+import { Notification, NotificationType, NotificationChannel, NotificationStatus } from '../../../src/domain/notification.entity';
 
 describe('Notification Entity', () => {
     it('should create a notification with pending status', () => {

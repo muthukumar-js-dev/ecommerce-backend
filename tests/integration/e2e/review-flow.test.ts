@@ -73,7 +73,14 @@ describe('Review System E2E Tests', () => {
         password: 'Password123!',
       });
 
-    userToken = userRes.body.data.token;
+    const userLogin = await request(app)
+      .post('/api/users/login')
+      .send({
+        email: 'user@test.com',
+        password: 'Password123!',
+      });
+
+    userToken = userLogin.body.data.token;
   });
 
   describe('Submit Review', () => {

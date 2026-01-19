@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongos
+  namespace: ecommerce-prod
+  labels:
+    app: mongos
+spec:
+  type: ClusterIP
+  ports:
+    - port: 27017
+      targetPort: 27017
+      name: mongodb
+  selector:
+    app: mongos
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongos
+  namespace: ecommerce-prod
+  labels:
+    app: mongos
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mongos
+  template:
+    metadata:
+      labels:
+        app: mongos
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - mongos
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: mongos
+          image: mongo:6
+          command:
+            - mongos
+            - --configdb
+            - configReplSet/mongo-config-0.mongo-config-headless.ecommerce-prod.svc.cluster.local:27019,mongo-config-1.mongo-config-headless.ecommerce-prod.svc.cluster.local:27019,mongo-config-2.mongo-config-headless.ecommerce-prod.svc.cluster.local:27019
+            - --bind_ip_all
+          ports:
+            - containerPort: 27017
+              name: mongodb
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: username
+                  optional: true
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: password
+                  optional: true
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+          livenessProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3

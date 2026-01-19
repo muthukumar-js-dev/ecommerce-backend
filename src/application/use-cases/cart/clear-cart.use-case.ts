@@ -7,7 +7,7 @@ import { ID } from '@shared/types/common';
  * Use case for clearing cart
  */
 export class ClearCartUseCase {
-  constructor(private readonly cartRepository: ICartRepository) {}
+  constructor(private readonly cartRepository: ICartRepository) { }
 
   async execute(userId: ID): AsyncResult<void> {
     const cart = await this.cartRepository.findByUserId(userId);
@@ -17,7 +17,7 @@ export class ClearCartUseCase {
 
     cart.clear();
 
-    const saveResult = await this.cartRepository.save(cart);
+    const saveResult = await this.cartRepository.update(cart);
     if (!saveResult.success) {
       return failure(saveResult.error);
     }

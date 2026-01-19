@@ -25,8 +25,8 @@ export class UpdateReviewUseCase {
     }
 
     // Update properties
-    if (dto.rating !== undefined) reviewProps.rating = dto.rating;
-    if (dto.comment) reviewProps.comment = dto.comment;
+    if (dto.rating !== undefined) {reviewProps.rating = dto.rating;}
+    if (dto.comment) {reviewProps.comment = dto.comment;}
     reviewProps.updatedAt = new Date();
 
     const updateResult = await this.reviewRepository.update(review);

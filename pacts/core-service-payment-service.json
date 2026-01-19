@@ -1,0 +1,196 @@
+{
+  "consumer": {
+    "name": "core-service"
+  },
+  "interactions": [
+    {
+      "description": "a request to initiate payment",
+      "providerStates": [
+        {
+          "name": "order exists and user has valid payment method"
+        }
+      ],
+      "request": {
+        "body": {
+          "amount": 1000,
+          "currency": "INR",
+          "orderId": "order-123",
+          "userId": "user-123"
+        },
+        "headers": {
+          "Authorization": "Bearer token123",
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.amount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.orderId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.userId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/api/payments/initiate"
+      },
+      "response": {
+        "body": {
+          "amount": 1000,
+          "currency": "INR",
+          "paymentId": "pay-123",
+          "status": "AUTHORIZED"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.amount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.paymentId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to refund payment",
+      "providerStates": [
+        {
+          "name": "payment is captured"
+        }
+      ],
+      "request": {
+        "body": {
+          "amount": 1000,
+          "reason": "Customer requested refund"
+        },
+        "headers": {
+          "Authorization": "Bearer token123",
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.amount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.reason": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/api/payments/pay-123/refund"
+      },
+      "response": {
+        "body": {
+          "amount": 1000,
+          "paymentId": "pay-123",
+          "refundId": "ref-123",
+          "status": "REFUNDED"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.amount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.refundId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "16.0.4"
+    },
+    "pactRust": {
+      "ffi": "0.4.28",
+      "models": "1.3.5"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "payment-service"
+  }
+}

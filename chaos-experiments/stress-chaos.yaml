@@ -1,0 +1,63 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: cpu-stress-experiment
+  namespace: chaos-testing
+  labels:
+    experiment: cpu-stress
+    severity: medium
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - ecommerce-prod
+    labelSelectors:
+      app: core-service
+  stressors:
+    cpu:
+      workers: 2
+      load: 80
+  duration: '5m'
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: memory-stress-experiment
+  namespace: chaos-testing
+  labels:
+    experiment: memory-stress
+    severity: medium
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - ecommerce-prod
+    labelSelectors:
+      app: core-service
+  stressors:
+    memory:
+      workers: 1
+      size: '512MB'
+  duration: '5m'
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: io-stress-experiment
+  namespace: chaos-testing
+  labels:
+    experiment: io-stress
+    severity: low
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - ecommerce-prod
+    labelSelectors:
+      app: core-service
+  stressors:
+    memory:
+      workers: 1
+      size: '256MB'
+      options: ['--vm-keep']
+  duration: '3m'

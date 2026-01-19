@@ -40,14 +40,14 @@ export interface ServiceHealth {
  * Manages service registration, discovery, and health checks
  */
 export class ConsulClient {
-    private consul: Consul.Consul;
+    private consul: Consul;
 
     constructor(host: string = 'localhost', port: string = '8500') {
         this.consul = new Consul({
             host,
-            port,
+            port: parseInt(port, 10),
             promisify: true,
-        });
+        } as any);
     }
 
     /**
@@ -57,7 +57,7 @@ export class ConsulClient {
         service: ServiceConfig,
         healthCheck: HealthCheck
     ): Promise<void> {
-        const registration: Consul.Agent.Service.RegisterOptions = {
+        const registration: any = {
             name: service.name,
             id: service.id,
             address: service.address,
@@ -127,15 +127,15 @@ export class ConsulClient {
     /**
      * Watch for changes to a service
      */
-    async watchService(
+    watchService(
         serviceName: string,
         callback: (instances: ServiceInstance[]) => void
-    ): Promise<Consul.Watch> {
+    ): Promise<any> {
         const watch = this.consul.watch({
-            method: this.consul.health.service,
+            method: this.consul.health.service.bind(this.consul.health),
             options: {
                 service: serviceName,
-                passing: true,
+                passing: true as any,
             },
         });
 
@@ -153,6 +153,6 @@ export class ConsulClient {
             console.error(`❌ Watch error for service ${serviceName}:`, err);
         });
 
-        return watch;
+        return Promise.resolve(watch);
     }
 }

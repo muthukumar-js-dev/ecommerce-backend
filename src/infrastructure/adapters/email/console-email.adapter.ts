@@ -8,7 +8,7 @@ import { ExternalServiceError } from '@shared/errors/external-service.error';
  * Can be replaced with SES/SendGrid adapter in production
  */
 export class ConsoleEmailAdapter implements IEmailService {
-    async send(message: EmailMessage): AsyncResult<{ messageId: string }> {
+    send(message: EmailMessage): AsyncResult<{ messageId: string }> {
         try {
             console.log('📧 Email sent:');
             console.log(`  To: ${message.to}`);
@@ -17,11 +17,11 @@ export class ConsoleEmailAdapter implements IEmailService {
             console.log(`  Data:`, JSON.stringify(message.data, null, 2));
 
             const messageId = `msg_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-            return success({ messageId });
+            return Promise.resolve(success({ messageId }));
         } catch (error: any) {
-            return failure(
+            return Promise.resolve(failure(
                 new ExternalServiceError('EmailService', 'Failed to send email', error)
-            );
+            ));
         }
     }
 
@@ -33,7 +33,7 @@ export class ConsoleEmailAdapter implements IEmailService {
             for (const message of messages) {
                 const result = await this.send(message);
                 if (result.success) {
-                    messageIds.push(result.value.messageId);
+                    messageIds.push(result.data.messageId);
                 } else {
                     throw result.error;
                 }

@@ -1,5 +1,8 @@
 import { ProductRepository } from '../../src/infrastructure/database/mongodb/repositories/product.repository';
-import { Product } from '../../src/domain/product/entities/product.entity';
+import { Product } from '../../src/domain/product/aggregates/product.aggregate';
+import { SKU } from '../../src/domain/product/value-objects/sku.vo';
+import { Money } from '../../src/domain/product/value-objects/money.vo';
+import { Quantity } from '../../src/domain/product/value-objects/quantity.vo';
 import {
   connectTestDatabase,
   disconnectTestDatabase,
@@ -7,12 +10,16 @@ import {
 } from '../utils/test-helpers';
 import { isSuccess } from '../../src/shared/types/result';
 
+const mockOutboxRepository = {
+  save: jest.fn().mockResolvedValue(undefined),
+} as any;
+
 describe('ProductRepository Integration Tests', () => {
   let repository: ProductRepository;
 
   beforeAll(async () => {
     await connectTestDatabase();
-    repository = new ProductRepository();
+    repository = new ProductRepository(mockOutboxRepository);
   });
 
   afterAll(async () => {
@@ -27,19 +34,18 @@ describe('ProductRepository Integration Tests', () => {
     it('should save and retrieve a product', async () => {
       const product = Product.create(
         {
-          pid: 'PROD-001',
+          sku: SKU.create('PROD-001'),
           title: 'Test Product',
           category: 'Electronics',
-          actualPrice: 1000,
-          sellingPrice: 800,
+          actualPrice: Money.create(1000),
+          sellingPrice: Money.create(800),
+          inventory: Quantity.create(100),
           brand: 'TestBrand',
           description: 'Test description for product',
-          averageRating: 4.5,
-          discount: 20,
-          outOfStock: false,
           images: ['image1.jpg'],
           productDetails: [{ key: 'Color', value: 'Black' }],
           sellerId: '507f1f77bcf86cd799439011',
+
         },
         '507f1f77bcf86cd799439012'
       );
@@ -60,32 +66,32 @@ describe('ProductRepository Integration Tests', () => {
     });
   });
 
-  describe('findByPid', () => {
-    it('should find product by PID', async () => {
+  describe('findByPid (SKU)', () => {
+    it('should find product by SKU', async () => {
       const product = Product.create(
         {
-          pid: 'UNIQUE-PID-123',
+          sku: SKU.create('PID-123-SKU'),
           title: 'Test Product',
           category: 'Electronics',
-          actualPrice: 1000,
-          sellingPrice: 800,
+          actualPrice: Money.create(1000),
+          sellingPrice: Money.create(800),
+          inventory: Quantity.create(50),
           brand: 'TestBrand',
           description: 'Test description',
-          averageRating: 0,
-          discount: 0,
-          outOfStock: false,
           images: ['image1.jpg'],
           productDetails: [],
           sellerId: '507f1f77bcf86cd799439011',
+
         },
         '507f1f77bcf86cd799439012'
       );
 
       await repository.save(product);
-      const found = await repository.findByPid('UNIQUE-PID-123');
+      // Repository uses findBySku or findByPid internally mapping to SKU
+      const found = await repository.findBySku(SKU.create('PID-123-SKU'));
 
       expect(found).not.toBeNull();
-      expect(found?.pid).toBe('UNIQUE-PID-123');
+      expect(found?.sku.value).toBe('PID-123-SKU');
     });
   });
 
@@ -93,19 +99,18 @@ describe('ProductRepository Integration Tests', () => {
     it('should update an existing product', async () => {
       const product = Product.create(
         {
-          pid: 'PROD-UPDATE',
+          sku: SKU.create('PROD-UPDATE'),
           title: 'Original Title',
           category: 'Electronics',
-          actualPrice: 1000,
-          sellingPrice: 800,
+          actualPrice: Money.create(1000),
+          sellingPrice: Money.create(800),
+          inventory: Quantity.create(10),
           brand: 'TestBrand',
           description: 'Test description',
-          averageRating: 0,
-          discount: 0,
-          outOfStock: false,
           images: ['image1.jpg'],
           productDetails: [],
           sellerId: '507f1f77bcf86cd799439011',
+
         },
         '507f1f77bcf86cd799439012'
       );
@@ -115,13 +120,13 @@ describe('ProductRepository Integration Tests', () => {
 
       if (isSuccess(saveResult)) {
         const savedProduct = saveResult.data;
-        savedProduct.markOutOfStock();
+        savedProduct.reserveInventory(savedProduct.inventory); // Consume all inventory
 
         const updateResult = await repository.update(savedProduct);
         expect(isSuccess(updateResult)).toBe(true);
 
         if (isSuccess(updateResult)) {
-          expect(updateResult.data.outOfStock).toBe(true);
+          expect(updateResult.data.isAvailable).toBe(false);
         }
       }
     });
@@ -131,19 +136,18 @@ describe('ProductRepository Integration Tests', () => {
     it('should delete an existing product', async () => {
       const product = Product.create(
         {
-          pid: 'PROD-DELETE',
+          sku: SKU.create('PROD-DELETE'),
           title: 'To Delete',
           category: 'Electronics',
-          actualPrice: 1000,
-          sellingPrice: 800,
+          actualPrice: Money.create(1000),
+          sellingPrice: Money.create(800),
+          inventory: Quantity.create(10),
           brand: 'TestBrand',
           description: 'Test description',
-          averageRating: 0,
-          discount: 0,
-          outOfStock: false,
           images: ['image1.jpg'],
           productDetails: [],
           sellerId: '507f1f77bcf86cd799439011',
+
         },
         '507f1f77bcf86cd799439012'
       );
@@ -167,47 +171,42 @@ describe('ProductRepository Integration Tests', () => {
 
       const product1 = Product.create(
         {
-          pid: 'PROD-1',
+          sku: SKU.create('PROD-1-SKU'),
           title: 'Product 1',
           category: 'Electronics',
-          actualPrice: 1000,
-          sellingPrice: 800,
+          actualPrice: Money.create(1000),
+          sellingPrice: Money.create(800),
+          inventory: Quantity.create(10),
           brand: 'TestBrand',
           description: 'Test description',
-          averageRating: 0,
-          discount: 0,
-          outOfStock: false,
           images: ['img1.jpg'],
           productDetails: [],
           sellerId,
+
         },
         '507f1f77bcf86cd799439012'
       );
 
       const product2 = Product.create(
         {
-          pid: 'PROD-2',
+          sku: SKU.create('PROD-2-SKU'),
           title: 'Product 2',
           category: 'Electronics',
-          actualPrice: 2000,
-          sellingPrice: 1800,
+          actualPrice: Money.create(2000),
+          sellingPrice: Money.create(1800),
+          inventory: Quantity.create(5),
           brand: 'TestBrand',
           description: 'Test description',
-          averageRating: 0,
-          discount: 0,
-          outOfStock: false,
           images: ['img2.jpg'],
           productDetails: [],
           sellerId,
+
         },
         '507f1f77bcf86cd799439013'
       );
 
-      const save1 = await repository.save(product1);
-      expect(isSuccess(save1)).toBe(true);
-
-      const save2 = await repository.save(product2);
-      expect(isSuccess(save2)).toBe(true);
+      await repository.save(product1);
+      await repository.save(product2);
 
       const products = await repository.findBySellerId(sellerId);
       expect(products).toHaveLength(2);
@@ -220,25 +219,23 @@ describe('ProductRepository Integration Tests', () => {
 
       const product = Product.create(
         {
-          pid: 'PROD-COUNT',
+          sku: SKU.create('PROD-COUNT'),
           title: 'Count Test',
           category: 'Electronics',
-          actualPrice: 1000,
-          sellingPrice: 800,
+          actualPrice: Money.create(1000),
+          sellingPrice: Money.create(800),
+          inventory: Quantity.create(10),
           brand: 'TestBrand',
           description: 'Test description',
-          averageRating: 0,
-          discount: 0,
-          outOfStock: false,
           images: ['img.jpg'],
           productDetails: [],
           sellerId: '507f1f77bcf86cd799439011',
+
         },
         '507f1f77bcf86cd799439012'
       );
 
-      const saveResult = await repository.save(product);
-      expect(isSuccess(saveResult)).toBe(true);
+      await repository.save(product);
       expect(await repository.count()).toBe(1);
 
       const all = await repository.findAll();

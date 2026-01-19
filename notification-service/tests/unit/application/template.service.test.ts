@@ -1,5 +1,5 @@
-import { TemplateService } from '@application/templates/template.service';
-import { NotificationType } from '@domain/notification.entity';
+import { TemplateService } from '../../../src/application/templates/template.service';
+import { NotificationType } from '../../../src/domain/notification.entity';
 
 describe('TemplateService', () => {
     let templateService: TemplateService;

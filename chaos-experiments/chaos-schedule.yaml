@@ -1,0 +1,81 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Schedule
+metadata:
+  name: weekly-chaos-tests
+  namespace: chaos-testing
+  labels:
+    schedule: weekly
+spec:
+  schedule: '0 2 * * 1'  # Every Monday at 2 AM
+  historyLimit: 5
+  concurrencyPolicy: Forbid
+  type: 'Workflow'
+  startingDeadlineSeconds: 300
+  workflowSpec:
+    entry: chaos-workflow
+    templates:
+      - name: chaos-workflow
+        templateType: Serial
+        deadline: 30m
+        children:
+          - pod-kill-test
+          - wait-recovery-1
+          - network-delay-test
+          - wait-recovery-2
+          - cpu-stress-test
+
+      # Pod Kill Test
+      - name: pod-kill-test
+        templateType: PodChaos
+        deadline: 5m
+        podChaos:
+          action: pod-kill
+          mode: one
+          selector:
+            namespaces:
+              - ecommerce-prod
+            labelSelectors:
+              app: core-service
+
+      # Network Delay Test
+      - name: network-delay-test
+        templateType: NetworkChaos
+        deadline: 10m
+        networkChaos:
+          action: delay
+          mode: all
+          selector:
+            namespaces:
+              - ecommerce-prod
+            labelSelectors:
+              app: core-service
+          delay:
+            latency: '100ms'
+            jitter: '10ms'
+          duration: '5m'
+
+      # CPU Stress Test
+      - name: cpu-stress-test
+        templateType: StressChaos
+        deadline: 5m
+        stressChaos:
+          mode: one
+          selector:
+            namespaces:
+              - ecommerce-prod
+            labelSelectors:
+              app: core-service
+          stressors:
+            cpu:
+              workers: 2
+              load: 80
+          duration: '3m'
+
+      # Recovery Wait Periods
+      - name: wait-recovery-1
+        templateType: Suspend
+        deadline: 2m
+
+      - name: wait-recovery-2
+        templateType: Suspend
+        deadline: 2m

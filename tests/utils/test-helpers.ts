@@ -1,27 +1,32 @@
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 
 /**
- * In-memory MongoDB for testing
+ * In-memory MongoDB Replica Set for testing
  */
-let mongoServer: MongoMemoryServer;
+let mongoServer: MongoMemoryReplSet;
 
 /**
  * Connect to in-memory database
  */
 export async function connectTestDatabase(): Promise<void> {
-  mongoServer = await MongoMemoryServer.create();
+  mongoServer = await MongoMemoryReplSet.create({
+    replSet: { count: 1, storageEngine: 'wiredTiger' },
+  });
   const mongoUri = mongoServer.getUri();
-  
+
   await mongoose.connect(mongoUri);
 }
+
 
 /**
  * Disconnect and stop in-memory database
  */
 export async function disconnectTestDatabase(): Promise<void> {
   await mongoose.disconnect();
-  await mongoServer.stop();
+  if (mongoServer) {
+    await mongoServer.stop();
+  }
 }
 
 /**
@@ -29,7 +34,7 @@ export async function disconnectTestDatabase(): Promise<void> {
  */
 export async function clearTestDatabase(): Promise<void> {
   const collections = mongoose.connection.collections;
-  
+
   for (const key in collections) {
     const collection = collections[key];
     if (collection) {
@@ -45,19 +50,19 @@ export const testDataGenerator = {
   randomString: (length: number = 10): string => {
     return Math.random().toString(36).substring(2, length + 2);
   },
-  
+
   randomEmail: (): string => {
     return `test-${testDataGenerator.randomString()}@example.com`;
   },
-  
+
   randomNumber: (min: number = 0, max: number = 1000): number => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   },
-  
+
   randomBoolean: (): boolean => {
     return Math.random() < 0.5;
   },
-  
+
   randomDate: (start: Date = new Date(2020, 0, 1), end: Date = new Date()): Date => {
     return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
   },

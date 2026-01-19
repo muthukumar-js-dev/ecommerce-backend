@@ -1,5 +1,5 @@
-import { ValueObject } from '@shared/domain/value-object';
-import { ValidationError } from '@shared/errors';
+import { ValueObject } from '../../../shared/domain/value-object';
+import { ValidationError } from '../../../shared/errors';
 
 interface ShippingAddressProps {
   street: string;
@@ -39,6 +39,26 @@ export class ShippingAddress extends ValueObject<ShippingAddressProps> {
     if (errors.length > 0) {
       throw new ValidationError('Invalid shipping address', errors);
     }
+  }
+
+  get street(): string {
+    return this._value.street;
+  }
+
+  get city(): string {
+    return this._value.city;
+  }
+
+  get state(): string {
+    return this._value.state;
+  }
+
+  get postalCode(): string {
+    return this._value.postalCode;
+  }
+
+  get country(): string {
+    return this._value.country;
   }
 
   get fullAddress(): string {

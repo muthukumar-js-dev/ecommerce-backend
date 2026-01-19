@@ -1,0 +1,78 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cost-alerts
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus
+spec:
+  groups:
+    - name: cost_optimization
+      interval: 1h
+      rules:
+        - alert: HighMonthlyCost
+          expr: aws_billing_estimated_charges > 5000
+          for: 1h
+          labels:
+            severity: warning
+            team: finance
+            category: cost
+          annotations:
+            summary: "Monthly cost exceeding budget"
+            description: "Estimated monthly cost is ${{ $value }} (budget: $5000)"
+            runbook_url: "https://runbooks.yourdomain.com/high-monthly-cost"
+
+        - alert: CostSpikeDetected
+          expr: |
+            (aws_billing_estimated_charges - aws_billing_estimated_charges offset 24h) 
+            / aws_billing_estimated_charges offset 24h > 0.2
+          for: 30m
+          labels:
+            severity: warning
+            team: devops
+            category: cost
+          annotations:
+            summary: "Unusual cost spike detected"
+            description: "Cost increased by {{ $value | humanizePercentage }} in last 24 hours"
+            runbook_url: "https://runbooks.yourdomain.com/cost-spike"
+
+        - alert: HighResourceWaste
+          expr: |
+            (sum(kube_pod_container_resource_requests{resource="cpu"}) 
+            - sum(rate(container_cpu_usage_seconds_total[5m]))) 
+            / sum(kube_pod_container_resource_requests{resource="cpu"}) > 0.4
+          for: 2h
+          labels:
+            severity: info
+            team: devops
+            category: efficiency
+          annotations:
+            summary: "High resource waste detected"
+            description: "{{ $value | humanizePercentage }} of requested CPU is unused"
+            runbook_url: "https://runbooks.yourdomain.com/resource-waste"
+
+        - alert: UnusedVolumesDetected
+          expr: count(kube_persistentvolume_status_phase{phase="Available"}) > 5
+          for: 24h
+          labels:
+            severity: info
+            team: devops
+            category: cleanup
+          annotations:
+            summary: "Multiple unused volumes detected"
+            description: "{{ $value }} persistent volumes are unused for >24 hours"
+            runbook_url: "https://runbooks.yourdomain.com/unused-volumes"
+
+        - alert: LowSpotInstanceUsage
+          expr: |
+            sum(kube_node_labels{label_node_lifecycle="spot"}) 
+            / sum(kube_node_labels) < 0.3
+          for: 6h
+          labels:
+            severity: info
+            team: devops
+            category: cost
+          annotations:
+            summary: "Low spot instance usage"
+            description: "Only {{ $value | humanizePercentage }} of nodes are spot instances (target: >50%)"
+            runbook_url: "https://runbooks.yourdomain.com/spot-instances"

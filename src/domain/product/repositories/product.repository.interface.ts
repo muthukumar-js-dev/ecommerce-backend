@@ -12,4 +12,5 @@ export interface IProductRepository {
   findAll(skip?: number, limit?: number): Promise<Product[]>;
   findByCategory(category: string, skip?: number, limit?: number): Promise<Product[]>;
   search(query: string): Promise<Product[]>;
+  count(): Promise<number>;
 }

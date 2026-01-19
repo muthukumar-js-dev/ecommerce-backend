@@ -32,8 +32,8 @@ describe('Stripe Contract Tests', () => {
 
             expect(isSuccess(result)).toBe(true);
             if (isSuccess(result)) {
-                expect(result.value.customerId).toMatch(/^cus_/);
-                testCustomerId = result.value.customerId;
+                expect(result.data.customerId).toMatch(/^cus_/);
+                testCustomerId = result.data.customerId;
             }
         });
 
@@ -59,11 +59,11 @@ describe('Stripe Contract Tests', () => {
 
             expect(isSuccess(result)).toBe(true);
             if (isSuccess(result)) {
-                expect(result.value.id).toMatch(/^pi_/);
-                expect(result.value.amount.amount).toBe(1000);
-                expect(result.value.amount.currency).toBe('INR');
-                expect(result.value.status).toBe('pending');
-                expect(result.value.clientSecret).toBeDefined();
+                expect(result.data.id).toMatch(/^pi_/);
+                expect(result.data.amount.amount).toBe(1000);
+                expect(result.data.amount.currency).toBe('INR');
+                expect(result.data.status).toBe('pending');
+                expect(result.data.clientSecret).toBeDefined();
             }
         });
 
@@ -75,7 +75,7 @@ describe('Stripe Contract Tests', () => {
 
             expect(isSuccess(result)).toBe(true);
             if (isSuccess(result)) {
-                expect(result.value.amount.currency).toBe('USD');
+                expect(result.data.amount.currency).toBe('USD');
             }
         });
 

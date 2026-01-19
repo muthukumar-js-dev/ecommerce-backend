@@ -38,15 +38,15 @@ describe('Product Aggregate', () => {
         'Selling price cannot exceed actual price'
       );
     });
-    
+
     it('should throw error if title is too short', () => {
-        const invalidProps = { ...validProps, title: 'Ab' };
-        expect(() => Product.create(invalidProps, '1')).toThrow('Product title must be at least 3 characters');
+      const invalidProps = { ...validProps, title: 'Ab' };
+      expect(() => Product.create(invalidProps, '1')).toThrow('Product title must be at least 3 characters');
     });
 
     it('should throw error if no images', () => {
-        const invalidProps = { ...validProps, images: [] };
-        expect(() => Product.create(invalidProps, '1')).toThrow('Product must have at least one image');
+      const invalidProps = { ...validProps, images: [] };
+      expect(() => Product.create(invalidProps, '1')).toThrow('Product must have at least one image');
     });
   });
 
@@ -85,7 +85,7 @@ describe('Product Aggregate', () => {
       const product = Product.create(validProps, 'prod-123');
       product.clearDomainEvents();
 
-      product.updatePrice(Money.create(750), 'admin-123');
+      product.updatePrice(Money.create(750), product.actualPrice, 'admin-123');
 
       expect(product.sellingPrice.amount).toBe(750);
       expect(product.domainEvents).toHaveLength(1);
@@ -99,22 +99,22 @@ describe('Product Aggregate', () => {
       expect(product.discountPercentage).toBe(20); // (1000-800)/1000 * 100
     });
   });
-  
+
   describe('availability', () => {
-     it('should return available if active and has inventory', () => {
-         const product = Product.create(validProps, '1');
-         expect(product.isAvailable).toBe(true);
-     });
-     
-     it('should return unavailable if inventory is 0', () => {
-         const product = Product.create({...validProps, inventory: Quantity.zero()}, '1');
-         expect(product.isAvailable).toBe(false);
-     });
-     
-     it('should return unavailable if deactivated', () => {
-         const product = Product.create(validProps, '1');
-         product.deactivate();
-         expect(product.isAvailable).toBe(false);
-     });
+    it('should return available if active and has inventory', () => {
+      const product = Product.create(validProps, '1');
+      expect(product.isAvailable).toBe(true);
+    });
+
+    it('should return unavailable if inventory is 0', () => {
+      const product = Product.create({ ...validProps, inventory: Quantity.zero() }, '1');
+      expect(product.isAvailable).toBe(false);
+    });
+
+    it('should return unavailable if deactivated', () => {
+      const product = Product.create(validProps, '1');
+      product.deactivate();
+      expect(product.isAvailable).toBe(false);
+    });
   });
 });

@@ -1,0 +1,98 @@
+{
+  "dashboard": {
+    "title": "Database Performance",
+    "tags": ["database", "mongodb"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Query Operations/sec",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(mongodb_op_counters_total{type=\"query\"}[5m])",
+            "legendFormat": "Queries"
+          },
+          {
+            "expr": "rate(mongodb_op_counters_total{type=\"insert\"}[5m])",
+            "legendFormat": "Inserts"
+          },
+          {
+            "expr": "rate(mongodb_op_counters_total{type=\"update\"}[5m])",
+            "legendFormat": "Updates"
+          },
+          {
+            "expr": "rate(mongodb_op_counters_total{type=\"delete\"}[5m])",
+            "legendFormat": "Deletes"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Query Execution Time (P95)",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(mongodb_query_duration_seconds_bucket[5m])) * 1000",
+            "legendFormat": "P95 Query Time (ms)"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Connection Pool",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "mongodb_connections{state=\"current\"}",
+            "legendFormat": "Current Connections"
+          },
+          {
+            "expr": "mongodb_connections{state=\"available\"}",
+            "legendFormat": "Available Connections"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Shard Distribution",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "mongodb_shard_chunks_total",
+            "legendFormat": "{{shard}}"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Slow Queries",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 16, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "sum(rate(mongodb_slow_queries_total[5m]))",
+            "legendFormat": "Slow Queries/sec"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Index Usage",
+        "type": "graph",
+        "gridPos": {"x": 6, "y": 16, "w": 18, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(mongodb_index_usage_total[5m])",
+            "legendFormat": "{{collection}}.{{index}}"
+          }
+        ]
+      }
+    ],
+    "refresh": "30s"
+  }
+}

@@ -42,7 +42,7 @@ scenarios:
 
       # 3. Add to cart
       - post:
-          url: '/api/cart/add'
+          url: '/api/cart/items'
           headers:
             Authorization: 'Bearer {{ token }}'
           json:

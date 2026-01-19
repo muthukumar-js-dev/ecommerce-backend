@@ -8,8 +8,6 @@ import { SKU } from '@domain/product/value-objects/sku.vo';
 import { Money } from '@domain/product/value-objects/money.vo';
 import { Quantity } from '@domain/product/value-objects/quantity.vo';
 import { OutboxRepository } from './outbox.repository';
-import { KafkaTopic } from '../../../messaging/kafka/topics';
-import mongoose from 'mongoose';
 
 /**
  * MongoDB implementation of Product repository
@@ -17,7 +15,7 @@ import mongoose from 'mongoose';
  * Uses Transactional Outbox pattern for reliable event publishing
  */
 export class ProductRepository implements IProductRepository {
-  constructor(private outboxRepository: OutboxRepository) { }
+  constructor(_outboxRepository: OutboxRepository) { }
   async findById(id: ID): Promise<Product | null> {
     try {
       const doc = await ProductModel.findById(id).exec();
@@ -37,7 +35,7 @@ export class ProductRepository implements IProductRepository {
   async findBySku(sku: SKU): Promise<Product | null> {
     try {
       const doc = await ProductModel.findOne({ pid: sku.value }).exec(); // storage uses 'pid' for SKU
-      if (doc === null) return null;
+      if (doc === null) { return null; }
       return this.toDomain(doc);
     } catch (error) {
       throw new DatabaseError('Failed to find by SKU', 'PRODUCT_FIND_BY_SKU_ERROR', error as Error);
@@ -132,7 +130,7 @@ export class ProductRepository implements IProductRepository {
         runValidators: true,
         setDefaultsOnInsert: true
       }).exec();
-      return success(this.toDomain(doc!));
+      return success(this.toDomain(doc));
     } catch (error: unknown) {
       const err = error as { code?: number };
       if (err.code === 11000) {
@@ -205,6 +203,7 @@ export class ProductRepository implements IProductRepository {
    * Map Mongoose document to domain entity
    */
   private toDomain(doc: IProductDocument): Product {
+    // console.log('[ProductRepository] toDomain doc:', JSON.stringify(doc, null, 2));
     const props: ProductProps = {
       sku: SKU.create(doc.pid),
       title: doc.title,
@@ -213,25 +212,21 @@ export class ProductRepository implements IProductRepository {
       brand: doc.brand,
       actualPrice: Money.create(doc.actual_price),
       sellingPrice: Money.create(doc.selling_price),
-      inventory: Quantity.create(doc.out_of_stock ? 0 : 100), // Defaulting inventory if not in schema (Schema has out_of_stock bool)
-      // Schema mismatch: Product (Task 3) likely added inventory count? 
-      // Checking schema: IProductDocument doesn't show 'inventory' field. It has out_of_stock boolean.
-      // Domain requires Quantity.
-      // We will mock it or fetch from separate inventory if existing? 
-      // For now: 0 if out_of_stock, else 100 (dummy) or 0.
-      // Ideally schema update required but avoiding too many changes.
-      // Let's check Schema quickly. Step 1620 view_file didn't show inventory field.
+      inventory: Quantity.create(doc.inventory !== undefined ? doc.inventory : (doc.out_of_stock ? 0 : 100)),
       images: doc.images,
       productDetails: doc.product_details,
       sellerId: doc.seller,
       subCategory: doc.sub_category,
       averageRating: doc.average_rating,
-      isActive: !doc.out_of_stock, // Mapping logic
+      isActive: !doc.out_of_stock,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
       stripeId: doc.stripeId,
       url: doc.url
     };
+    if (!doc.title) {
+      console.error('[ProductRepository] CRITICAL: doc.title is missing in toDomain!', doc);
+    }
     return Product.reconstitute(props, doc._id as string);
   }
 
@@ -240,6 +235,7 @@ export class ProductRepository implements IProductRepository {
    */
   private toPersistence(product: Product): Partial<IProductDocument> {
     const props = (product as unknown as { props: ProductProps }).props;
+    // console.log('[ProductRepository] toPersistence props:', JSON.stringify(props, null, 2));
     return {
       _id: product.id,
       pid: props.sku.value,
@@ -251,13 +247,14 @@ export class ProductRepository implements IProductRepository {
       description: props.description,
       average_rating: props.averageRating,
       discount: product.discountPercentage,
-      out_of_stock: props.inventory.isZero, // Derive bool from VO
+      out_of_stock: props.inventory.isZero,
+      inventory: props.inventory.value,
       images: props.images,
       product_details: props.productDetails,
       seller: props.sellerId,
       sub_category: props.subCategory,
-      stripeId: props.stripeId, // Optional in props
-      url: props.url // Optional
+      stripeId: props.stripeId,
+      url: props.url
     };
   }
 }
